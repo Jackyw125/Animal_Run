@@ -1,3 +1,15 @@
+/*
+Author: Jacky & Ochihai
+Date: Nov 18, 2024
+
+Purpose:
+    - Implements a double-buffered game engine.
+    - Handles game model initialization, user input processing, model synchronization, event processing, and rendering.
+    - Ensures smooth gameplay through efficient time and buffer management.
+
+Error:
+    - Jump mechanic still not working
+*/
 #include "MODEL.H"
 #include "RENDER.H"
 #include "EVENTS.H"
