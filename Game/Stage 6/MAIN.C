@@ -106,15 +106,16 @@ UINT8 *page1 = Physbase();
     return 0;
 }
 
-
 /***********************************************************************
 * Name: input
 *
 * Purpose: Handles user input for the game.
 *
-* Details: Checks if keyboard input is available and reads the key.
-*          If the pressed key is 'a', 'd', or 'q', it updates the
-*          pressedKey variable accordingly.
+* Details: 
+*   - Captures input using `Cconis` and `Cnecin`.
+*   - Updates the `pressedKey` if ' ', 'q', or other specified keys are pressed.
+*   - Integrates user input into game mechanics via `animal_input`.
+
 *
 * Parameters:
 *     - model: Pointer to the game model.
@@ -136,7 +137,6 @@ void input(Model *model, char *pressedKey)
     animal_input(&(model->chicken), *pressedKey);
 }
 
-
 /***********************************************************************
 * Name: syncModel
 *
@@ -156,12 +156,8 @@ void syncModel(Model *modelSrc, Model *modelDst)
     Coin *srcCoin, *dstCoin;
     Monster *srcMon, *dstMon;
 
-
-
-
     modelDst->chicken.x = modelSrc->chicken.x;
     modelDst->chicken.y = modelSrc->chicken.y;
-
 
     modelDst->chicken.velocity = modelSrc->chicken.velocity;
     modelDst->chicken.isFalling = modelSrc->chicken.isFalling;
@@ -185,7 +181,6 @@ void syncModel(Model *modelSrc, Model *modelDst)
         dstMon++;    
     }
 
-
     srcCoin = (modelSrc->coins);
     dstCoin = (modelDst->coins);
 
@@ -197,9 +192,6 @@ void syncModel(Model *modelSrc, Model *modelDst)
         dstCoin++;    
     }
 }
-
-
-
 
 /***********************************************************************
 * Name: process_synchronous_events
