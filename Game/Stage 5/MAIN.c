@@ -1,3 +1,21 @@
+/*
+Author: Jacky & Ochihai
+Date: Nov 18, 2024
+
+Purpose:
+    - Implements a simplified game loop with single-buffered rendering.
+    - Manages game model initialization, user input processing, event handling, and rendering.
+    - Provides utility functions for timing and input handling.
+
+Description:
+    This file contains the main function and essential components of the game engine.
+    The game runs in a loop, processing user inputs and synchronous events while updating
+    the display with the latest game state.
+
+Error:
+    Jumping mechanic does not work.
+*/
+
 #include "MODEL.H"
 #include "RENDER.H"
 #include "EVENTS.H"
