@@ -210,8 +210,7 @@ void syncModel(Model *modelSrc, Model *modelDst)
 *
 * Purpose: Processes synchronous events for the game.
 *
-* Details: Calls functions to handle animal movement, screen shifting,
-*          off-screen replacement, and animal death checking.
+* Details: Calls functions to handle animal movement,and animal death checking.
 *
 * Parameters:
 *     - model: Pointer to the game model.
@@ -221,8 +220,6 @@ void syncModel(Model *modelSrc, Model *modelDst)
 void process_synchronous_events(Model *model, bool *endGame, int seed)
 {
     animal_horizontal_movement((model));
-
-
     check_animal_death(model, endGame);
 }
 
