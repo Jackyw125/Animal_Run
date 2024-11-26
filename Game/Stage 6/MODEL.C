@@ -43,7 +43,7 @@ void initialize_animal(Animal *chicken)
     chicken->prev_y = -1;
     chicken->velocity = ANIMAL_HORIZONTAL_MOVEMENT;
     chicken->isFalling = false;
-    chicken->max_y = chicken->y;
+    chicken->velocity_y = 0;
     chicken->dead = false;
 }
 

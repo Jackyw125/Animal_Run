@@ -129,53 +129,35 @@ bool check_ground_collision(Animal *chicken, Ground* ground) {
     return false;
 }
 
-void animal_vertical_movement(Model *model)
+void animal_vertical_movement(Animal *chicken)
 {
-    Animal *chicken = &(model->chicken);
-
     switch (chicken->state) {
         case ANIMAL_STATE_MOVING_UP:
-            chicken->max_y -= MAX_VERT_VELOCITY;
-
-            chicken->y -= chicken->max_y;
-            if (chicken->max_y <= 0) {
+            move_animal(chicken, ANIMAL_HORIZONTAL_MOVEMENT, -MAX_VERT_VELOCITY);
+            chicken->velocity_y = MAX_VERT_VELOCITY;
+            if (chicken->velocity_y >= 0) {
                 chicken->state = ANIMAL_STATE_MOVING_DOWN;
-            }
+            }   
             break;
-
         case ANIMAL_STATE_MOVING_DOWN:
-      
-            chicken->y += chicken->velocity;
-
-            chicken->max_y += MAX_VERT_VELOCITY;
-
+            chicken->y += MAX_VERT_VELOCITY;
             if (chicken->y + CHICKEN_HEIGHT >= GROUND_Y) {
                 chicken->y = GROUND_Y - CHICKEN_HEIGHT;
-                chicken->max_y = 0;
+                chicken->velocity_y = 0;
                 chicken->state = ANIMAL_STATE_ON_GROUND;
             }
             break;
-
         case ANIMAL_STATE_ON_GROUND:
-            chicken->max_y= 0;
+            chicken->velocity_y= 0;
             break;
-
         default:
             break;
-    }
-    if (chicken->y < 0) {
-        chicken->y = 0;
-        chicken->max_y = 0;
-        chicken->state = ANIMAL_STATE_MOVING_DOWN;
     }
 }
 
 void animal_jump(Animal *chicken)
 {
-    if (chicken->state == ANIMAL_STATE_ON_GROUND) {
-        chicken->max_y = MAX_VERT_VELOCITY; 
         chicken->state = ANIMAL_STATE_MOVING_UP;
-    }
 }
 
 /***********************************************************************

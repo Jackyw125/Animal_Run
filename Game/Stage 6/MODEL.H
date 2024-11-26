@@ -14,8 +14,8 @@ Purpose:
 
 #define MAX_COINS 5
 #define MAX_MONSTER 2
-#define MAX_VERT_VELOCITY 24
-#define ANIMAL_HORIZONTAL_MOVEMENT 16
+#define MAX_VERT_VELOCITY 55
+#define ANIMAL_HORIZONTAL_MOVEMENT 8
 #define ANIMAL_STATE_MOVING_UP 1
 #define ANIMAL_STATE_MOVING_DOWN 2
 #define ANIMAL_STATE_ON_GROUND 3
@@ -25,7 +25,7 @@ typedef struct
     int x, y; 
     int prev_x, prev_y;
     int velocity;
-    int max_y;
+    int velocity_y;
     int state;
     bool isFalling;
     bool dead;

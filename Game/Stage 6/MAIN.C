@@ -73,19 +73,15 @@ UINT8 *page1 = Physbase();
 
     while (pressedKey != 'q' && !endGame) { /* Main game loop */
 
-
-        input(modelPtr, &pressedKey);
-
-
-        timeNow = get_time();
         timeElapsed = timeNow - timeThen;
-
 
         if(timeElapsed > 0)
         {
             Vsync();
             if(useDoubleBuffer)
                 {
+                    input(modelPtr, &pressedKey);
+                    animal_vertical_movement(&(modelPtr->chicken));
                     process_synchronous_events(modelPtr, &endGame, seed);
                    
                     syncModel(modelPtr, modelSnapshotOne);
@@ -98,6 +94,8 @@ UINT8 *page1 = Physbase();
                 }
                 else
                 {
+                    input(modelPtr, &pressedKey);
+                    animal_vertical_movement(&(modelPtr->chicken));
                     process_synchronous_events(modelPtr, &endGame, seed);
 
                     syncModel(modelPtr, modelSnapshotTwo);
@@ -173,7 +171,7 @@ void syncModel(Model *modelSrc, Model *modelDst)
 
     modelDst->chicken.velocity = modelSrc->chicken.velocity;
     modelDst->chicken.isFalling = modelSrc->chicken.isFalling;
-    modelDst->chicken.max_y = modelSrc->chicken.max_y;
+    modelDst->chicken.velocity_y = modelSrc->chicken.velocity_y;
     modelDst->chicken.dead = modelSrc->chicken.dead;
 
 
