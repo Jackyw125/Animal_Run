@@ -84,12 +84,12 @@ UINT8 read_psg(int reg)
 
         if (reg >= 0 && reg <= 15){	
 			
-			old_ssp = Super(0);
-			
-			*PSG_reg_select = reg;
-			val = *PSG_reg_select;
-				
-			Super(old_ssp);
+                old_ssp = Super(0);
+                
+                *PSG_reg_select = reg;
+                val = *PSG_reg_select;
+                        
+                Super(old_ssp);
         }
         return val;
 }
@@ -122,7 +122,6 @@ void set_tone(int channel, int tuning)
         /* Split 12-bit tuning into 8-bit and 4-bit components */
         int fine_tune = tuning & 0x00FF;             /* LSB */
         int coarse_tune = (tuning & 0x0FF0) >> 8;   /* MSB */
-        
         switch (channel)
         {
         case ch_a:
@@ -210,56 +209,55 @@ void set_volume(int channel, int volume)
  */ 
 
 
-void enable_channel(int channel, bool tone_on, bool noise_on)
+void enable_channel(int channel, bool noise_on, bool tone_on)
 {       
        /* Retain the existing value in the mixer by default */
-        UINT8 mixerControl;
-		read_psg(MIXER_REGISTER);
-
+        UINT16 mixerControl;
+        
         switch (channel)
         {
                 case ch_a:
-                        if (tone_on && noise_on)
+                        if (tone_on == 1 && noise_on == 0)
                         {
-                                mixerControl = mixerControl & IO_PORT_A_NOISEON_TONEON;
+                                mixerControl = IO_PORT_A_NOISEON_TONEOFF;
                         }
-                        if (noise_on && !tone_on)
+                        else if (noise_on == 1 && tone_on == 0)
                         {
-                                mixerControl = mixerControl & IO_PORT_A_NOISEON_TONEOFF;
+                               mixerControl = IO_PORT_A_NOISEOFF_TONEON;
                         }
-                        if (tone_on && !noise_on)
+                        else if (tone_on == 1 && noise_on == 1)
                         {
-                                mixerControl = mixerControl & IO_PORT_A_NOISEOFF_TONEON;
+                                mixerControl = (IO_PORT_A_NOISEOFF_TONEON && IO_PORT_A_NOISEON_TONEOFF);
                         }
                         break;
                 
                 case ch_b:
-                        if (tone_on && noise_on)
+                        if (tone_on == 1 && noise_on == 0)
                         {
-                                mixerControl = mixerControl & IO_PORT_B_NOISEON_TONEON;
+                                mixerControl = IO_PORT_B_NOISEON_TONEOFF;
                         }
-                        if (noise_on && !tone_on)
+                        else if (noise_on == 1 && tone_on == 0)
                         {
-                                mixerControl = mixerControl & IO_PORT_B_NOISEON_TONEOFF;
+                                mixerControl = IO_PORT_B_NOISEOFF_TONEON;
                         }
-                        if (tone_on && !noise_on)
+                        else if (tone_on == 1 && noise_on == 1)
                         {
-                                mixerControl = mixerControl & IO_PORT_B_NOISEOFF_TONEON;
+                                mixerControl = (IO_PORT_B_NOISEOFF_TONEON && IO_PORT_B_NOISEON_TONEOFF);
                         }
                         break;
                 
                 case ch_c:
-                        if (tone_on && noise_on)
+                        if (tone_on == 1 && noise_on == 0)
                         {
-                                mixerControl = mixerControl & IO_PORT_C_NOISEON_TONEON;
+                                mixerControl = IO_PORT_C_NOISEON_TONEOFF;
                         }
-                        if (noise_on && !tone_on)
+                        if (noise_on == 1 && tone_on == 0)
                         {
-                                mixerControl = mixerControl & IO_PORT_C_NOISEON_TONEOFF;
+                                mixerControl = IO_PORT_C_NOISEOFF_TONEON;
                         }
-                        if (tone_on && !noise_on)
+                        if (tone_on == 1 && noise_on == 1)
                         {
-                                mixerControl = mixerControl & IO_PORT_C_NOISEOFF_TONEON;
+                                mixerControl = (IO_PORT_C_NOISEOFF_TONEON && IO_PORT_C_NOISEON_TONEOFF);
                         }
                         break;
                 

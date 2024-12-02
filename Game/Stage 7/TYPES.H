@@ -18,7 +18,7 @@ typedef unsigned int  UINT16;
 typedef unsigned long UINT32;
 
 typedef unsigned char bool;
-#define true 1
-#define false 0
+#define true 0
+#define false 1
 
 #endif

@@ -27,28 +27,28 @@
 
 const notes wonderful_christmastime[] = {
     /* First phrase: "D G A D" */
-    {293.66, 500},  /* D */
-    {392.00, 500},  /* G */
-    {440.00, 500},  /* A */
-    {293.66, 500},  /* D */
+    {293.66, 170},  /* D */
+    {392.00, 170},  /* G */
+    {440.00, 170},  /* A */
+    {293.66, 170},  /* D */
 
     /* Second phrase: "A G E D" */
-    {440.00, 500},  /* A */
-    {392.00, 500},  /* G */
-    {329.63, 500},  /* E */
-    {293.66, 500},  /* D */
+    {440.00, 170},  /* A */
+    {392.00, 170},  /* G */
+    {329.63, 170},  /* E */
+    {293.66, 170},  /* D */
 
     /* Third phrase: "D G A B" */
-    {293.66, 500},  /* D */
-    {392.00, 500},  /* G */
-    {440.00, 500},  /* A */
-    {493.88, 500},  /* B */
+    {293.66, 170},  /* D */
+    {392.00, 170},  /* G */
+    {440.00, 170},  /* A */
+    {493.88, 170},  /* B */
 
     /* Fourth phrase: "A G F# G" */
-    {440.00, 500},  /* A */
-    {392.00, 500},  /* G */
-    {369.99, 500},  /* F# */
-    {392.00, 500},  /* G */
+    {440.00, 170},  /* A */
+    {392.00, 170},  /* G */
+    {369.99, 170},  /* F# */
+    {392.00, 170},  /* G */
 }; 
  
  /*
@@ -70,13 +70,12 @@ const notes wonderful_christmastime[] = {
  *   Assumes that the PSG is properly initialized and ready to play music.
  */
 void start_music()
-{
-	set_tone(ch_a, wonderful_christmastime[current_note].pitch);
-	enable_channel(ch_a,1,0);
+{  
+    set_tone(ch_a, wonderful_christmastime[current_note].pitch);
+    enable_channel(ch_a, 1, 0);
 	set_volume(ch_a,12);
 	duration = wonderful_christmastime[current_note].duration;
-	current_note++;
-
+	current_note++; 
 }
 
 /*
@@ -100,7 +99,7 @@ void start_music()
 
 void update_music(UINT32 time_elapsed)
 {
-	duration -= time_elapsed;
+	duration--;
 	
 	if (duration <= 0)
 	{

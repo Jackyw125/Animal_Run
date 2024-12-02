@@ -1,3 +1,7 @@
+# Clean before compiling 
+all: clean tst_music tst_effects tst_psg tst_rend tst_mod tst_rast
+
+# Targets and dependencies
 tst_music.o: tst_music.c music.h 
 	cc68x -g -c tst_music.c
 
@@ -61,5 +65,7 @@ bitmap.o: bitmap.c bitmap.h font.h
 font.o: font.c font.h
 	cc68x -g -c font.c
 
+# Clean target
 clean:
-	$(RM) *.o *.tos
+	$(RM) *.o *.tos tst_music tst_effects tst_psg tst_rend tst_mod tst_rast
+
