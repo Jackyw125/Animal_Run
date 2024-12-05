@@ -14,11 +14,9 @@
 void check_animal_death(Model *model, bool *endGame)
 {
     int i; 
-    for (i = 0; i < MAX_MONSTER; i++) {
-        if (check_collision_monster(&(model->chicken), &(model->monster[i]))) {
+        if (check_collision_monster(&(model->chicken), &(model->monster))) {
             model->chicken.dead = true;
             *endGame = true;
-        }
     }
     return;
 }
@@ -28,23 +26,33 @@ void check_animal_death(Model *model, bool *endGame)
 *
 * Purpose: Handles user input for animal movement.
 *
-* Details: If the spacebar is pressed, moves the animal vertically.
+* Details: If the spacebar is pressed, the animal jumps vertically.
+*          If the W key is held, the animal flies continuously.
+*          If no keys are held, the animal falls if in the air.
 *          If the animal is dead, no movement is allowed.
 *
 * Parameters:
 *     - chicken: Pointer to the animal object.
-*     - key: chicken representing the pressed key.
+*     - key: Represents the pressed key (or '\0' if no key is held).
 ***********************************************************************/
 void animal_input(Animal *chicken, char key)
 {
-    if(chicken->dead)
+    if (chicken->dead)
         return;
-
-    if(key == ' '){
-        animal_jump(chicken);
+    if (key == 'W' || key == 'w') {
+        chicken->state = ANIMAL_STATE_FLYING;
+    } else {
+        if (chicken->state == ANIMAL_STATE_FLYING && (key != 'w' || key != 'W')) {
+            chicken->state = ANIMAL_STATE_FLY_DOWN;
+        }
     }
-
+    if (chicken->state == ANIMAL_STATE_ON_GROUND){
+        if (key == ' ' && chicken->state != ANIMAL_STATE_JUMP_DOWN) {
+            animal_jump(chicken);
+            }
+    }
 }
+
 
 /***********************************************************************
 * Name: check_collision_coin
@@ -59,9 +67,8 @@ void animal_input(Animal *chicken, char key)
 * Returns:
 *     - bool: True if collision occurs, false otherwise.
 ***********************************************************************/
-bool check_collision_coin(Animal *chicken, Coin *coins) {
-    int i;
-    for (i = 0; i < MAX_COINS; i++) {
+bool check_collision_coin(Animal *chicken, Coin *coins, int index) {
+        int i = index;
         if (coins[i].active) {
             bool horizontal_overlap = (chicken->x + CHICKEN_WIDTH > coins[i].x) &&
                                       (chicken->x < coins[i].x + COIN_WIDTH);
@@ -70,10 +77,10 @@ bool check_collision_coin(Animal *chicken, Coin *coins) {
                                     (chicken->y < coins[i].y + COIN_HEIGHT);
 
             if (horizontal_overlap && vertical_overlap) {
+                coins[i].active = false;
                 return true; 
             }
         }
-    }
     return false; 
 }
 
@@ -90,20 +97,17 @@ bool check_collision_coin(Animal *chicken, Coin *coins) {
 * Returns:
 *     - bool: True if collision occurs, false otherwise.
 ***********************************************************************/
-
 bool check_collision_monster(Animal *chicken, Monster *monster)
 {
     int i; 
-    for (i = 0; i < MAX_MONSTER; i++) {
-        bool horizontal_overlap = (chicken->x + CHICKEN_WIDTH > monster[i].x) &&
-                                  (chicken->x < monster[i].x + MONSTER_WIDTH);
+        bool horizontal_overlap = (chicken->x + CHICKEN_WIDTH > monster->x) &&
+                                  (chicken->x < monster->x + MONSTER_WIDTH);
 
-        bool vertical_overlap = (chicken->y + CHICKEN_HEIGHT > monster[i].y) &&
-                                (chicken->y < monster[i].y + MONSTER_HEIGHT);
+        bool vertical_overlap = (chicken->y + CHICKEN_HEIGHT > monster->y) &&
+                                (chicken->y < monster->y + MONSTER_HEIGHT);
 
         if (horizontal_overlap && vertical_overlap) {
             return true; 
-        }
     }
     return false;
 }
@@ -129,18 +133,41 @@ bool check_ground_collision(Animal *chicken, Ground* ground) {
     return false;
 }
 
+/***********************************************************************
+* Name: animal_vertical_movement
+*
+* Purpose: Handles vertical movement of the animal, including jumping,
+*          falling, and flying states.
+*
+* Parameters:
+*     - chicken: Pointer to the animal object.
+***********************************************************************/
 void animal_vertical_movement(Animal *chicken)
 {
     switch (chicken->state) {
-        case ANIMAL_STATE_MOVING_UP:
-            move_animal(chicken, ANIMAL_HORIZONTAL_MOVEMENT, -MAX_VERT_VELOCITY);
+        case ANIMAL_STATE_JUMP:
+            move_animal(chicken, ANIMAL_HORIZONTAL_JUMP, -MAX_VERT_VELOCITY);
             chicken->velocity_y = MAX_VERT_VELOCITY;
-            if (chicken->velocity_y >= 0) {
-                chicken->state = ANIMAL_STATE_MOVING_DOWN;
-            }   
+            if(chicken->velocity_y > 0) {
+                chicken->state = ANIMAL_STATE_JUMP_DOWN;
+            }
             break;
-        case ANIMAL_STATE_MOVING_DOWN:
-            chicken->y += MAX_VERT_VELOCITY;
+        case ANIMAL_STATE_JUMP_DOWN:
+            chicken->y += GRAVITY;  
+            if (chicken->y + CHICKEN_HEIGHT >= GROUND_Y) {
+                chicken->y = GROUND_Y - CHICKEN_HEIGHT;
+                chicken->velocity_y = 0;
+                chicken->state = ANIMAL_STATE_ON_GROUND;
+            }
+            break;
+        case ANIMAL_STATE_FLYING:
+            chicken->y -= FLYING;
+            if (chicken->y < 0) {    
+                chicken->y = 0;
+            }
+            break;
+        case ANIMAL_STATE_FLY_DOWN:
+            chicken->y += GRAVITY;  
             if (chicken->y + CHICKEN_HEIGHT >= GROUND_Y) {
                 chicken->y = GROUND_Y - CHICKEN_HEIGHT;
                 chicken->velocity_y = 0;
@@ -148,7 +175,7 @@ void animal_vertical_movement(Animal *chicken)
             }
             break;
         case ANIMAL_STATE_ON_GROUND:
-            chicken->velocity_y= 0;
+            chicken->velocity_y = 0;
             break;
         default:
             break;
@@ -157,7 +184,7 @@ void animal_vertical_movement(Animal *chicken)
 
 void animal_jump(Animal *chicken)
 {
-        chicken->state = ANIMAL_STATE_MOVING_UP;
+    chicken->state = ANIMAL_STATE_JUMP;
 }
 
 /***********************************************************************
@@ -176,15 +203,24 @@ void animal_jump(Animal *chicken)
  *   the player collects a coin. It checks for a collision using the 
  *   `check_collision_coin` function. If a collision is detected:
  ***********************************************************************/
-void update_score(Model *model)
-{
+void update_score(Model *model) {
     int i;
     for (i = 0; i < MAX_COINS; i++) {
         if (model->coins[i].active && 
-            check_object_collision(model->chicken.x, model->chicken.y, CHICKEN_WIDTH, CHICKEN_HEIGHT,
-                                   model->coins[i].x, model->coins[i].y, COIN_WIDTH, COIN_HEIGHT)) {
-            model->coins[i].active = false;  
-            model->score.total++;  
+            check_collision_coin(&model->chicken, model->coins, i)) {
+            model->coins[i].active = false; 
+            model->score.total++;
         }
     }
+}
+
+bool respawn_event(Model *model) {
+    int i;
+
+    for (i = 0; i < MAX_COINS; i++) {
+        if (model->coins[i].active) {
+            return false; 
+        }
+    }
+    return true; 
 }

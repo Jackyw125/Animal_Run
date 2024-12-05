@@ -25,35 +25,33 @@ void render(Model *model, UINT32 *base)
 {
     int i;
     if (has_animal_moved(&(model->chicken))) {   
-        clear_bitmap_32(base, model->chicken.prev_x, model->chicken.prev_y, clear_bitmap, CHICKEN_HEIGHT);
         render_animal(&(model->chicken), base);
     }
 
-    render_monster(model->monster, base);
-    render_coin(model->coins, (UINT16 *)base);
+    render_monster(&model->monster, base);
+    render_coin((model->coins), (UINT16 *)base);
 
     render_score(&(model->score), base); 
     render_ground(&(model->ground), (UINT8 *)base);
 }
 
-void double_buffer_render(Model *model, UINT32 *base)
-{
-    UINT8 i;
-    UINT8 j;
-    Coin *modelCoins = model->coins;
-
-    /*Comparing to previous state so that stationary objects are not redrawn*/
-    if(model->chicken.prev_x != model->chicken.x || model->chicken.prev_y != model->chicken.y)
-    {
+void double_buffer_render(Model *model, UINT32 *base) {
+    int i, j;
+    bool collected;
+    if (model->chicken.prev_x != model->chicken.x || model->chicken.prev_y != model->chicken.y) {
         clear_bitmap_32(base, model->chicken.prev_x, model->chicken.prev_y, clear_bitmap, CHICKEN_HEIGHT);
         model->chicken.prev_x = model->chicken.x;
         model->chicken.prev_y = model->chicken.y;
-
         render_animal(&(model->chicken), base);
     }
-
-        render_score(&(model->score), base);
-        render_ground(&(model->ground), (UINT8 *)base);
+    for (i = 0; i < MAX_COINS; i++){
+        if (check_collision_coin(&model->chicken, model->coins, i))
+        {
+            clear_bitmap_32(base, model->coins[i].x, model->coins[i].y, clear_bitmap, CHICKEN_HEIGHT);
+        }
+    }
+    render_score(&(model->score), base);
+    render_ground(&(model->ground), (UINT8 *)base);
 }
 
 /***********************************************************************
@@ -92,8 +90,6 @@ void render_score(Score *score, UINT32 *base)
     }
 }
 
-
-
 /***********************************************************************
 * Name: render_animal
 *
@@ -108,7 +104,7 @@ void render_score(Score *score, UINT32 *base)
 
 void render_animal(Animal *chicken, UINT32 *base)
 {
-        plot_bitmap_32(base, chicken->x, chicken->y, chicken_bitmap, CHICKEN_HEIGHT);
+    plot_bitmap_32(base, chicken->x, chicken->y, chicken_bitmap, CHICKEN_HEIGHT);
 }
 
 /***********************************************************************
@@ -125,12 +121,7 @@ void render_animal(Animal *chicken, UINT32 *base)
 ***********************************************************************/
 void render_monster(Monster *monster, UINT32 *base)
 {
-    int i;
-    for (i = 0; i < MAX_MONSTER; i++) {
-        if (!monster[i].off_screen) {  
-            plot_bitmap_32(base, monster[i].x, monster[i].y, monster_bitmap, MONSTER_HEIGHT);
-        }
-    }
+        plot_bitmap_32(base, monster->x, monster->y, monster_bitmap, MONSTER_HEIGHT);
 }
 
 /***********************************************************************
@@ -145,8 +136,7 @@ void render_monster(Monster *monster, UINT32 *base)
 *     - coin: Pointer to the coin object.
 *     - base: Pointer to the base address of the screen buffer.
 ***********************************************************************/
-void render_coin(Coin *coin, UINT16 *base)
-{
+void render_coin(Coin *coin, UINT16 *base){
     int i;
     for (i = 0; i < MAX_COINS; i++) {
         if (coin[i].active) {  
@@ -157,4 +147,18 @@ void render_coin(Coin *coin, UINT16 *base)
 
 void render_ground(Ground *ground, UINT8 *base) {
     plot_horizontal_line(base, ground->y);  
+}
+
+void respawn_render(Model *model, UINT32 *base)
+{
+    bool collected;
+    collected = respawn_event(model);
+    if (collected) {
+        initialize_coins(model->coins, &(model->monster)); 
+        render_coin((model->coins), (UINT16 *)base);
+        collected = false;   
+    } 
+    else{
+        render_coin((model->coins), (UINT16 *)base);
+    }
 }

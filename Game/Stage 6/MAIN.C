@@ -6,9 +6,6 @@ Purpose:
     - Implements a double-buffered game engine.
     - Handles game model initialization, user input processing, model synchronization, event processing, and rendering.
     - Ensures smooth gameplay through efficient time and buffer management.
-
-Error:
-    - Jump mechanic still not working
 */
 #include "MODEL.H"
 #include "RENDER.H"
@@ -16,52 +13,40 @@ Error:
 #include <osbind.h>
 #include <stdio.h>
 
-
 UINT8 double_buffer[448][80] = {0};
-
 
 UINT32 get_time();
 void input(Model *model, char *pressedKey);
 void syncModel(Model *modelSrc, Model *modelDst);
-void process_synchronous_events(Model *model, bool *endGame, int seed);
-
+void process_synchronous_events(Model *model);
+void process_asynchronous_events(Model *model, bool *endGame, UINT32 *base);
 
 int main() {
-UINT8 *page1 = Physbase();
+    UINT8 *page1 = Physbase();
     UINT8 *page2 = &double_buffer[0][0];
     UINT8 confirmedInput;
-    int seed;
-
 
     bool useDoubleBuffer = true;
     bool endGame = false;
 
-
     UINT32 timeThen, timeNow, timeElapsed;
-
 
     Model modelOne, modelTwo, modelThree;
     Model *modelPtr = &modelOne;
     Model *modelSnapshotOne = &modelTwo;
     Model *modelSnapshotTwo = &modelThree;
     char pressedKey = 0;
-
-
-    seed = Random();
-
+    bool respawned = false;
 
     initialize_model(modelPtr);
     initialize_model(modelSnapshotOne);
     initialize_model(modelSnapshotTwo);
 
-
     page2 = (UINT8*)((size_t)page2 | 0xff ) + 1; /* finding page aligned address for second page*/
-
 
     /* prepering models for main game loop*/
     syncModel(modelPtr, modelSnapshotOne);
     syncModel(modelPtr, modelSnapshotTwo);
-
 
     /* preparing models for main game loop */
     clear_screen(page1);
@@ -69,7 +54,6 @@ UINT8 *page1 = Physbase();
     render(modelPtr, (UINT32*)page1);
     render(modelPtr, (UINT32*)page2);
     timeThen = get_time();
-
 
     while (pressedKey != 'q' && !endGame) { /* Main game loop */
 
@@ -82,11 +66,10 @@ UINT8 *page1 = Physbase();
                 {
                     input(modelPtr, &pressedKey);
                     animal_vertical_movement(&(modelPtr->chicken));
-                    process_synchronous_events(modelPtr, &endGame, seed);
-                   
+                    process_synchronous_events(modelPtr);
+                    process_asynchronous_events(modelPtr,&endGame,(UINT32*)page1);
                     syncModel(modelPtr, modelSnapshotOne);
                     double_buffer_render(modelSnapshotTwo, (UINT32*)page1);
-                    update_score(modelPtr);
 
                     Setscreen(-1, page1, -1);
                    
@@ -96,21 +79,21 @@ UINT8 *page1 = Physbase();
                 {
                     input(modelPtr, &pressedKey);
                     animal_vertical_movement(&(modelPtr->chicken));
-                    process_synchronous_events(modelPtr, &endGame, seed);
-
+                    process_synchronous_events(modelPtr);
+                    process_asynchronous_events(modelPtr, &endGame, (UINT32*)page2);
                     syncModel(modelPtr, modelSnapshotTwo);
                     double_buffer_render(modelSnapshotOne,(UINT32*)page2);
-                    update_score(modelPtr);
                    
                     Setscreen(-1, page2, -1);
                    
                     useDoubleBuffer = true;
                 }
-                seed = seed*3;
                 Vsync();
             }
             timeThen = get_time();
         }
+        
+    Setscreen(-1, page1, -1);
     clear_screen(page1);
     Vsync();
     return 0;
@@ -136,14 +119,13 @@ void input(Model *model, char *pressedKey)
     if (Cconis()) /* Check if keyboard input is available */
     {
         char key = (char)Cnecin(); /* Read keyboard input */
-        if (key == ' ' || key == 'q') {
+        if (key == ' ' || key == 'q' || key == 'W' || key == 'w') {
             *pressedKey = key;
         }
     }
     else {
         *pressedKey = 0; /* Reset pressedKey if no key is pressed */
     }
-
     animal_input(&(model->chicken), *pressedKey);
 }
 
@@ -164,7 +146,6 @@ void syncModel(Model *modelSrc, Model *modelDst)
     UINT8 i;
     UINT8 j;
     Coin *srcCoin, *dstCoin;
-    Monster *srcMon, *dstMon;
 
     modelDst->chicken.x = modelSrc->chicken.x;
     modelDst->chicken.y = modelSrc->chicken.y;
@@ -179,17 +160,10 @@ void syncModel(Model *modelSrc, Model *modelDst)
     modelDst->score.prev_total = modelSrc->score.prev_total;
     modelDst->score.digits = modelSrc->score.digits;
    
-    srcMon = modelSrc->monster;
-    dstMon = modelDst->monster;
-    for(j = 0; j < MAX_MONSTER; j++)
-    {
-        dstMon->x = srcMon->x;
-        dstMon->y = srcMon->y;
-
-
-        srcMon++;
-        dstMon++;    
-    }
+    modelDst->monster.x = modelSrc->monster.x;
+    modelDst->monster.y = modelSrc->monster.y;
+    modelDst->monster.prev_x = modelSrc->monster.prev_x;
+    modelDst->monster.prev_y = modelSrc->monster.prev_y;
 
     srcCoin = (modelSrc->coins);
     dstCoin = (modelDst->coins);
@@ -215,10 +189,16 @@ void syncModel(Model *modelSrc, Model *modelDst)
 *     - endGame: Pointer to a boolean indicating game end.
 *     - seed: Random seed for event generation.
 ***********************************************************************/
-void process_synchronous_events(Model *model, bool *endGame, int seed)
+void process_synchronous_events(Model *model)
 {
-    animal_horizontal_movement((model));
+    animal_horizontal_movement(&(model->chicken));
+}
+
+void process_asynchronous_events(Model *model, bool *endGame, UINT32 *base)
+{
     check_animal_death(model, endGame);
+    update_score(model);    
+    respawn_render(model, base);
 }
 
 /***********************************************************************
@@ -238,5 +218,3 @@ UINT32 get_time() {
     Super(old_ssp);
     return time;
 }
-
-

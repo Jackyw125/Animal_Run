@@ -1,26 +1,47 @@
-main: main.o model.o events.o render.o bitmap.o raster.o font.o 
-	cc68x -g main.o model.o events.o render.o bitmap.o raster.o font.o -o main
+# Compiler
+CC = cc68x
 
-main.o: main.c model.h render.h events.h 
-	cc68x -g -c main.c
+# Compiler Flags
+CFLAGS = -g -c
 
-render.o: render.c render.h model.h events.h bitmap.h raster.h
-	cc68x -g -c render.c
+# Target Executable
+TARGET = main
+
+# Object Files
+OBJS = main.o model.o events.o render.o bitmap.o raster.o font.o
+
+# Header Files (Optional for readability)
+HEADERS = model.h render.h events.h bitmap.h raster.h font.h
+
+# Build all (clean first)
+all: clean $(TARGET)
+
+# Link the final executable
+$(TARGET): $(OBJS)
+	$(CC) -g $(OBJS) -o $(TARGET)
+
+# Compile each source file into object files
+main.o: main.c model.h render.h events.h
+	$(CC) $(CFLAGS) main.c
+
+render.o: render.c render.h model.h events.h raster.h bitmap.h font.h
+	$(CC) $(CFLAGS) render.c
 
 model.o: model.c model.h
-	cc68x -g -c model.c
+	$(CC) $(CFLAGS) model.c
 
-events.o: events.c events.h 
-	cc68x -g -c events.c
+events.o: events.c events.h
+	$(CC) $(CFLAGS) events.c
 
 raster.o: raster.c raster.h
-	cc68x -g -c raster.c
+	$(CC) $(CFLAGS) raster.c
 
 bitmap.o: bitmap.c bitmap.h font.h
-	cc68x -g -c bitmap.c
-	
-font.o: font.c font.h
-	cc68x -g -c font.c
+	$(CC) $(CFLAGS) bitmap.c
 
+font.o: font.c font.h
+	$(CC) $(CFLAGS) font.c
+
+# Clean up
 clean:
-	$(RM) *.o *.tos
+	$(RM) $(OBJS) $(TARGET)

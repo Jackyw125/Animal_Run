@@ -9,7 +9,6 @@ Purpose:
                     - Clear horizontal lines & clear screen
 
 */
-
 #ifndef RASTER_H
 #define RASTER_H
 #include "types.h"
