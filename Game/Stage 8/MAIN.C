@@ -10,7 +10,7 @@ Purpose:
 #include "MODEL.H"
 #include "RENDER.H"
 #include "EVENTS.H"
-#include "VIDEO.H"
+#include "RASTER.H"
 #include <osbind.h>
 #include <stdio.h>
 
@@ -19,11 +19,11 @@ UINT8 double_buffer[448][80] = {0};
 UINT32 get_time();
 void input(Model *model, char *pressedKey);
 void syncModel(Model *modelSrc, Model *modelDst);
-void process_synchronous_events(Model *model);
-void process_asynchronous_events(Model *model, bool *endGame, UINT32 *base);
+void process_synchronous_events(Model *model, bool *endGame, UINT32 *base);
+void process_asynchronous_events(Model *model, char *pressedKey);
 
 int main() {
-    UINT8 *page1 = Physbase();
+    UINT8 *page1 = get_video_base();
     UINT8 *page2 = &double_buffer[0][0];
     UINT8 confirmedInput;
 
@@ -48,51 +48,48 @@ int main() {
     /* prepering models for main game loop*/
     syncModel(modelPtr, modelSnapshotOne);
     syncModel(modelPtr, modelSnapshotTwo);
-
-    /* preparing models for main game loop */
     clear_screen(page1);
     clear_screen(page2);
     render(modelPtr, (UINT32*)page1);
     render(modelPtr, (UINT32*)page2);
     time_then = get_time();
 
-while (pressedKey != 'q' && !endGame) { /* Main game loop */
-    time_now = get_time();
-    time_elapsed = time_now - time_then;
-    get_video_base();
+    while (pressedKey != 'q' && !endGame) { /* Main game loop */
+    Vsync();
         if (useDoubleBuffer) {
             input(modelPtr, &pressedKey);
             if(pressedKey == ' ' || 'w' || 'W')
             {
-                process_asynchronous_events(modelPtr,&endGame,(UINT32*)page1);
+                process_asynchronous_events(modelPtr,&pressedKey);
             }
             time_now = get_time();
 	        time_elapsed = time_now - time_then;
             if (time_elapsed > 0) {
-                process_synchronous_events(modelPtr);
+                process_synchronous_events(modelPtr,&endGame,(UINT32*)page1);
+                syncModel(modelPtr, modelSnapshotOne);
+                double_buffer_render(modelSnapshotTwo, (UINT32*)page1);
+                set_video_base(page1);
             }
-            respawn_render(modelPtr, (UINT32*)page1);
-            syncModel(modelPtr, modelSnapshotOne);
-            double_buffer_render(modelSnapshotTwo, (UINT32*)page1);
-            set_video_base(page1);
+
+            useDoubleBuffer = false;
         } else {
             input(modelPtr, &pressedKey);
             if(pressedKey == ' ' || 'w' || 'W')
             {
-                process_asynchronous_events(modelPtr,&endGame,(UINT32*)page1);
+                process_asynchronous_events(modelPtr, &pressedKey);
             }
             time_now = get_time();
 	        time_elapsed = time_now - time_then;            
             if (time_elapsed > 0) {
-                process_synchronous_events(modelPtr); 
-            }           
-            respawn_render(modelPtr, (UINT32*)page2);
-            syncModel(modelPtr, modelSnapshotTwo);
-            double_buffer_render(modelSnapshotOne, (UINT32*)page2);
-            set_video_base(page2);
+                process_synchronous_events(modelPtr,&endGame,(UINT32*)page2); 
+                syncModel(modelPtr, modelSnapshotTwo);
+                double_buffer_render(modelSnapshotOne, (UINT32*)page2); 
+                set_video_base(page2);
+            }   
+
+            useDoubleBuffer = true;
         }
-        useDoubleBuffer = !useDoubleBuffer;
-        get_video_base();
+        Vsync();
         time_then = time_now; 
     }
     set_video_base(page1);
@@ -127,7 +124,6 @@ void input(Model *model, char *pressedKey)
     else {
         *pressedKey = 0; /* Reset pressedKey if no key is pressed */
     }
-    animal_input(&(model->chicken), *pressedKey);
 }
 
 /***********************************************************************
@@ -161,10 +157,6 @@ void syncModel(Model *modelSrc, Model *modelDst)
     modelDst->score.prev_total = modelSrc->score.prev_total;
     modelDst->score.digits = modelSrc->score.digits;
    
-    modelDst->monster.x = modelSrc->monster.x;
-    modelDst->monster.y = modelSrc->monster.y;
-    modelDst->monster.prev_x = modelSrc->monster.prev_x;
-    modelDst->monster.prev_y = modelSrc->monster.prev_y;
 
     srcCoin = (modelSrc->coins);
     dstCoin = (modelDst->coins);
@@ -190,15 +182,17 @@ void syncModel(Model *modelSrc, Model *modelDst)
 *     - endGame: Pointer to a boolean indicating game end.
 *     - seed: Random seed for event generation.
 ***********************************************************************/
-void process_synchronous_events(Model *model)
-{
-    animal_horizontal_movement(&(model->chicken));
-    animal_vertical_movement(&(model->chicken));
-}
-
-void process_asynchronous_events(Model *model, bool *endGame, UINT32 *base)
+void process_synchronous_events(Model *model, bool *endGame, UINT32 *base)
 {
     check_animal_death(model, endGame);
+    animal_horizontal_movement(&(model->chicken));
+    animal_vertical_movement(&(model->chicken));
+    respawn_render(model, base);
+}
+
+void process_asynchronous_events(Model *model, char *pressedKey)
+{
+    animal_input(&(model->chicken), *pressedKey);
     update_score(model);    
 }
 

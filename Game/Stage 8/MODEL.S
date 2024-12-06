@@ -49,7 +49,7 @@ _initialize_animal:
 	;line	40
 	move.w	#10,(a3)
 	;line	41
-	move.w	#258,2(a3)
+	move.w	#256,2(a3)
 	;line	42
 	move.w	#-1,4(a3)
 	;line	43

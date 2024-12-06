@@ -42,19 +42,16 @@ void animal_input(Animal *chicken, char key)
         return;
     if (key == 'W' || key == 'w') {
         animal_fly(chicken);
-        for(i = 0; i < 15000; i++)
+        for(i = 0; i < 8875; i++)
             ;
     } else {
         if (chicken->state != ANIMAL_STATE_ON_GROUND && (key != 'w' || key != 'W')) {
-
             chicken->state = ANIMAL_STATE_FLY_DOWN;
         }
     }
-    if (chicken->state == ANIMAL_STATE_ON_GROUND){
-        if (key == ' ' && chicken->state != ANIMAL_STATE_JUMP_DOWN) {
+    if (chicken->state == ANIMAL_STATE_ON_GROUND && key == ' ' && chicken->state != ANIMAL_STATE_JUMP_DOWN) {
             animal_jump(chicken);
         }
-    }
 }
 
 /***********************************************************************

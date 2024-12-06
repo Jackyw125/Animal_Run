@@ -24,9 +24,8 @@
 void render(Model *model, UINT32 *base)
 {
     int i;
-    if (has_animal_moved(&(model->chicken))) {   
-        render_animal(&(model->chicken), base);
-    }
+  
+    render_animal(&(model->chicken), base);
 
     render_monster(&model->monster, base);
     render_coin((model->coins), (UINT16 *)base);
@@ -43,6 +42,7 @@ void double_buffer_render(Model *model, UINT32 *base) {
         model->chicken.prev_y = model->chicken.y;
         render_animal(&(model->chicken), base);
     }
+
     for (i = 0; i < MAX_COINS; i++){
         if (check_collision_coin(&model->chicken, model->coins, i))
         {

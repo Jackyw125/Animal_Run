@@ -38,7 +38,7 @@ void initialize_model(Model *model)
 void initialize_animal(Animal *chicken)
 {
     chicken->x = 10;
-    chicken->y = (GROUND_Y) - 62;
+    chicken->y = (GROUND_Y) - 64;
     chicken->prev_x = -1;
     chicken->prev_y = -1;
     chicken->velocity = ANIMAL_HORIZONTAL_MOVEMENT;
