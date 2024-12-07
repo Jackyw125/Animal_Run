@@ -29,7 +29,7 @@ int main() {
     bool useDoubleBuffer = true;
     bool endGame = false;
 
-    UINT32 timeThen, timeNow, timeElapsed;
+    UINT32 time_then, time_now, time_elapsed;
 
     Model modelOne, modelTwo, modelThree;
     Model *modelPtr = &modelOne;
@@ -53,49 +53,55 @@ int main() {
     clear_screen(page2);
     render(modelPtr, (UINT32*)page1);
     render(modelPtr, (UINT32*)page2);
-    timeThen = get_time();
+    time_then = get_time();
 
     while (pressedKey != 'q' && !endGame) { /* Main game loop */
-
-        timeElapsed = timeNow - timeThen;
-
-        if(timeElapsed > 0)
-        {
             Vsync();
             if(useDoubleBuffer)
                 {
+                    /*if input is pending then process async events*/
+                    /*if clock has ticked then proccess sync events then render model*/
                     input(modelPtr, &pressedKey);
-                    animal_vertical_movement(&(modelPtr->chicken));
-                    process_synchronous_events(modelPtr);
-                    process_asynchronous_events(modelPtr,&endGame,(UINT32*)page1);
-                    syncModel(modelPtr, modelSnapshotOne);
-                    double_buffer_render(modelSnapshotTwo, (UINT32*)page1);
-
-                    Setscreen(-1, page1, -1);
+                    if(pressedKey == ' ' || 'w' || 'W')
+                    {
+                        process_asynchronous_events(modelPtr,&endGame,(UINT32*)page1);
+                    }
+                    time_now = get_time();
+		            time_elapsed = time_now - time_then;
+                    if(time_elapsed > 0){
+                        process_synchronous_events(modelPtr);
+                        respawn_render(modelPtr, (UINT32*)page1);
+                        syncModel(modelPtr, modelSnapshotOne);
+                        double_buffer_render(modelSnapshotTwo, (UINT32*)page1);
+                        Setscreen(-1, page1, -1);
+                    }
                    
                     useDoubleBuffer = false;
                 }
                 else
                 {
                     input(modelPtr, &pressedKey);
-                    animal_vertical_movement(&(modelPtr->chicken));
-                    process_synchronous_events(modelPtr);
-                    process_asynchronous_events(modelPtr, &endGame, (UINT32*)page2);
-                    syncModel(modelPtr, modelSnapshotTwo);
-                    double_buffer_render(modelSnapshotOne,(UINT32*)page2);
-                   
-                    Setscreen(-1, page2, -1);
-                   
+                    if(pressedKey == ' ' || 'w' || 'W')
+                    {
+                        process_asynchronous_events(modelPtr,&endGame,(UINT32*)page1);
+                    }
+                    time_now = get_time();
+		            time_elapsed = time_now - time_then;
+                    if(time_elapsed > 0){
+                        process_synchronous_events(modelPtr);
+                        respawn_render(modelPtr, (UINT32*)page2);
+                        syncModel(modelPtr, modelSnapshotTwo);
+                        double_buffer_render(modelSnapshotOne,(UINT32*)page2);
+                        Setscreen(-1, page2, -1);
+                    }
+                                      
                     useDoubleBuffer = true;
                 }
                 Vsync();
-            }
-            timeThen = get_time();
+            time_then = get_time();
         }
-        
     Setscreen(-1, page1, -1);
     clear_screen(page1);
-    Vsync();
     return 0;
 }
 
@@ -192,13 +198,13 @@ void syncModel(Model *modelSrc, Model *modelDst)
 void process_synchronous_events(Model *model)
 {
     animal_horizontal_movement(&(model->chicken));
+    animal_vertical_movement(&(model->chicken));
 }
 
 void process_asynchronous_events(Model *model, bool *endGame, UINT32 *base)
 {
     check_animal_death(model, endGame);
     update_score(model);    
-    respawn_render(model, base);
 }
 
 /***********************************************************************

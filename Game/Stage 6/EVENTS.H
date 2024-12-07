@@ -20,6 +20,7 @@ bool check_collision_monster(Animal *chicken, Monster *monster);
 bool check_ground_collision(Animal *chicken, Ground* ground);
 void animal_vertical_movement(Animal *chicken);
 void animal_jump(Animal *chicken);
+void animal_fly(Animal *chicken);
 void update_score(Model *model);
 bool respawn_event(Model *model);
 #endif

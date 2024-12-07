@@ -37,20 +37,21 @@ void check_animal_death(Model *model, bool *endGame)
 ***********************************************************************/
 void animal_input(Animal *chicken, char key)
 {
+    int i;
     if (chicken->dead)
         return;
     if (key == 'W' || key == 'w') {
-        chicken->state = ANIMAL_STATE_FLYING;
+        animal_fly(chicken);
+        for(i = 0; i < 8875; i++)
+            ;
     } else {
-        if (chicken->state == ANIMAL_STATE_FLYING && (key != 'w' || key != 'W')) {
+        if (chicken->state != ANIMAL_STATE_ON_GROUND && (key != 'w' || key != 'W')) {
             chicken->state = ANIMAL_STATE_FLY_DOWN;
         }
     }
-    if (chicken->state == ANIMAL_STATE_ON_GROUND){
-        if (key == ' ' && chicken->state != ANIMAL_STATE_JUMP_DOWN) {
+    if (chicken->state == ANIMAL_STATE_ON_GROUND && key == ' ' && chicken->state != ANIMAL_STATE_JUMP_DOWN) {
             animal_jump(chicken);
-            }
-    }
+        }
 }
 
 
@@ -187,6 +188,10 @@ void animal_jump(Animal *chicken)
     chicken->state = ANIMAL_STATE_JUMP;
 }
 
+void animal_fly(Animal *chicken)
+{
+    chicken->state = ANIMAL_STATE_FLYING;
+}
 /***********************************************************************
  * Function Name: update_score
  *
