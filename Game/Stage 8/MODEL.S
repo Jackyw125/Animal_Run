@@ -51,9 +51,9 @@ _initialize_animal:
 	;line	41
 	move.w	#256,2(a3)
 	;line	42
-	move.w	#-1,4(a3)
+	move.w	(a3),4(a3)
 	;line	43
-	move.w	#-1,6(a3)
+	move.w	2(a3),6(a3)
 	;line	44
 	move.w	#8,8(a3)
 	;line	45

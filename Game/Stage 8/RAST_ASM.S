@@ -4,8 +4,8 @@
 	    xdef		_clear_screen
 		xdef		_set_video_base
 		xdef		_get_video_base
-		xdef		_enter_super
-		xdef		_exit_super
+		xdef		_super_mode
+		xdef		_user_mode
 
 base		equ		64		; offset from SP, not A6
 
@@ -34,14 +34,14 @@ _get_video_base:
 		link	a6,#0
 		movem.l	d3/a0,-(sp)
 
-		bsr _enter_super
+		jsr _super_mode
 
 		clr.l 	d3
 		move.l  #video_reg_address,a0
 		movep.w (a0),d3
 		lsl.l   #8,d3
 
-		bsr _exit_super
+		jsr _user_mode
 		
 		move.l d3,d0
 		
@@ -61,7 +61,7 @@ _set_video_base:
 		link	a6,#0
 		movem.l	d0/a0,-(sp)
 
-		bsr		_enter_super
+		jsr		_super_mode
 
 		clr.l 	d0
 		move.l	NEW_VIDEO_BASE_OFFSET(a6),d0
@@ -69,7 +69,7 @@ _set_video_base:
 		move.l  #video_reg_address,a0
 		movep.w d0,(a0)
 		
-		bsr		_exit_super
+		jsr		_user_mode
 		
 		movem.l	(sp)+,d0/a0
 		unlk	a6
@@ -79,7 +79,7 @@ _set_video_base:
 ; PURPOSE:  lets user enter supervisor mode
 ;-------------------------------------------------------------------------------
 
-_enter_super:
+_super_mode:
 		movem.l	d0,-(sp)
 
 		clr.l	-(sp)		; enter supervisor mode with user stack
@@ -96,7 +96,7 @@ _enter_super:
 ; PURPOSE:  lets user exit supervisor mode
 ;-------------------------------------------------------------------------------
 
-_exit_super:
+_user_mode:
 		movem.l	d0,-(sp)
 
 		move.l	old_ssp(pc),-(sp)	; return to user mode, restoring

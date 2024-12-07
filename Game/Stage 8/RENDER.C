@@ -23,8 +23,6 @@
  ***********************************************************************/
 void render(Model *model, UINT32 *base)
 {
-    int i;
-  
     render_animal(&(model->chicken), base);
 
     render_monster(&model->monster, base);
@@ -35,7 +33,9 @@ void render(Model *model, UINT32 *base)
 }
 
 void double_buffer_render(Model *model, UINT32 *base) {
-    int i, j;
+    int i;
+    clear_screen((UINT8 *)base);
+
     if (model->chicken.prev_x != model->chicken.x || model->chicken.prev_y != model->chicken.y) {
         clear_bitmap_32(base, model->chicken.prev_x, model->chicken.prev_y, clear_bitmap, CHICKEN_HEIGHT);
         model->chicken.prev_x = model->chicken.x;
@@ -52,7 +52,10 @@ void double_buffer_render(Model *model, UINT32 *base) {
             render_coin((model->coins), (UINT16 *)base);
         }
     }
-    
+    respawn_render(model,base);
+
+    render_monster(&model->monster, base);
+
     render_score(&(model->score), base);
     render_ground(&(model->ground), (UINT8 *)base);
 }

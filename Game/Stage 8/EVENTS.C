@@ -229,3 +229,27 @@ bool respawn_event(Model *model) {
     return true; 
 }
 
+/***********************************************************************
+* Name: process_synchronous_events
+*
+* Purpose: Processes synchronous events for the game.
+*
+* Details: Calls functions to handle animal movement,and animal death checking.
+*
+* Parameters:
+*     - model: Pointer to the game model.
+*     - endGame: Pointer to a boolean indicating game end.
+*     - seed: Random seed for event generation.
+***********************************************************************/
+void process_synchronous_events(Model *model, bool *endGame)
+{
+    check_animal_death(model, endGame);
+    animal_horizontal_movement(&(model->chicken));
+    animal_vertical_movement(&(model->chicken));
+    update_score(model);    
+}
+
+void process_asynchronous_events(Model *model, char *pressedKey)
+{
+    animal_input(&(model->chicken), *pressedKey);
+}

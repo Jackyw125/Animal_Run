@@ -39,8 +39,8 @@ void initialize_animal(Animal *chicken)
 {
     chicken->x = 10;
     chicken->y = (GROUND_Y) - 64;
-    chicken->prev_x = -1;
-    chicken->prev_y = -1;
+    chicken->prev_x = chicken->x;
+    chicken->prev_y = chicken->y;
     chicken->velocity = ANIMAL_HORIZONTAL_MOVEMENT;
     chicken->isFalling = false;
     chicken->velocity_y = 0;
