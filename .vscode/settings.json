@@ -1,7 +1,13 @@
 {
     "files.associations": {
         "TSTMODEL.C": "cpp",
-        "EVENTS.C": "cpp"
+        "EVENTS.C": "cpp",
+        "MAIN.C": "cpp",
+        "BITMAP.C": "cpp",
+        "FONT.C": "cpp",
+        "RASTER.C": "cpp",
+        "RENDER.C": "cpp",
+        "MENU.C": "cpp"
     },
     "[m68k]": {
         "editor.rulers": []
