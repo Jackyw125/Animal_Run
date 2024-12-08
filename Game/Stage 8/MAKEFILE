@@ -8,10 +8,10 @@ CFLAGS = -g -c
 TARGET = main
 
 # Object Files
-OBJS = main.o model.o events.o render.o bitmap.o raster.o font.o rast_asm.o
+OBJS = main.o model.o events.o render.o bitmap.o raster.o font.o rast_asm.o menu.o
 
 # Header Files (Optional for readability)
-HEADERS = model.h render.h events.h bitmap.h raster.h font.h 
+HEADERS = model.h render.h events.h bitmap.h raster.h font.h menu.h
 
 # Build all (clean first)
 all: clean $(TARGET)
@@ -24,7 +24,7 @@ $(TARGET): $(OBJS)
 main.o: main.c model.h render.h events.h raster.h
 	$(CC) $(CFLAGS) main.c
 
-render.o: render.c render.h model.h events.h raster.h bitmap.h font.h
+render.o: render.c render.h model.h events.h raster.h bitmap.h font.h menu.h
 	$(CC) $(CFLAGS) render.c
 
 model.o: model.c model.h
@@ -44,6 +44,9 @@ rast_asm.o: rast_asm.s
 
 font.o: font.c font.h
 	$(CC) $(CFLAGS) font.c
+
+menu.o: menu.c menu.h
+	$(CC) $(CFLAGS) menu.c
 
 # Clean up
 clean:

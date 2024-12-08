@@ -24,8 +24,23 @@ void switch_buffers(UINT32** current_buffer, UINT32* front_buffer, UINT32 * back
 
 int main() {
     UINT8 *current_buffer = (UINT8 *)get_video_base();
-    
-    main_game_loop();
+    char pressed_key;
+    bool quit = false;
+    Model model;
+
+    clear_screen((UINT8 *)current_buffer);
+
+    render_main_menu(current_buffer);
+
+    while(quit == false) {
+        if (pressed_key == ' ') {
+            main_game_loop();
+            render_main_menu(current_buffer);
+        } else if (pressed_key == 'q') { 
+            quit = true;
+            }
+        input(&model, &pressed_key); 
+    }
 
     return 0;
 }

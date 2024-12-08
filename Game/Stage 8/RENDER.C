@@ -168,3 +168,8 @@ void respawn_render(Model *model, UINT32 *base)
         render_coin((model->coins), (UINT16 *)base);
     }
 }
+
+void render_main_menu(UINT8 *base)
+{
+	plot_bitmap_screen((UINT32*)base, main_menu_bitmap);
+}

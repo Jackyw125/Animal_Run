@@ -45,8 +45,8 @@ void animal_input(Animal *chicken, char key)
         for(i = 0; i < 8875; i++)
             ;
     } else {
-        if (chicken->state != ANIMAL_STATE_ON_GROUND && (key != 'w' || key != 'W')) {
-            chicken->state = ANIMAL_STATE_FLY_DOWN;
+        if (chicken->state == ANIMAL_STATE_FLYING) {
+            chicken->state = ANIMAL_STATE_FLY_DOWN; 
         }
     }
     if (chicken->state == ANIMAL_STATE_ON_GROUND && key == ' ' && chicken->state != ANIMAL_STATE_JUMP_DOWN) {
