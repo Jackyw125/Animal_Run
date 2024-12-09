@@ -1,9 +1,3 @@
-#ifndef EFFECTS_H
-#define EFFECTS_H
-
-#include "psg.h"
-
-
 /* ***************** Header File for the effects library ***************** */
 /*
  * File: effects.h
@@ -20,11 +14,15 @@
  * - Jacky On
  * 
  */
- 
+#ifndef EFFECTS_H
+#define EFFECTS_H
 
+#include "PSG.H"
+
+ 
 void coin_collected();
 void collison_effect();
 void jump_effect();
  
  
- #endif
+#endif

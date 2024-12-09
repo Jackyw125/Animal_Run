@@ -11,28 +11,26 @@ Purpose:
 #include "RENDER.H"
 #include "EVENTS.H"
 #include "RASTER.H"
+#include "INPUT.H"
 #include "PSG.H"
 #include "MUSIC.H"
 #include "EFFECTS.H"
 #include <osbind.h>
 #include <stdio.h>
 
-
 UINT8 double_buffer[35840] = {0};
 
 UINT32 get_time();
 void main_game_loop();
-void sound_effects(Model* model);
-void input(Model *model, char *pressedKey);
 void set_buffers(UINT32** back_buffer, UINT32** front_buffer, UINT8 back_buffer_array[]);
-void switch_buffers(UINT32** current_buffer, UINT32* front_buffer, UINT32 * back_buffer);
+void swap_buffer(UINT32** current_buffer, UINT32* front_buffer, UINT32 * back_buffer);
+void sound_effects(Model *model, char pressed_key);
 
 int main() {
     UINT8 *current_buffer = (UINT8 *)get_video_base();
     char pressed_key;
     bool quit = false;
     Model model;
-    int i = 0;
 
     clear_screen((UINT8 *)current_buffer);
 
@@ -43,8 +41,6 @@ int main() {
             main_game_loop();
             render_main_menu((UINT32 *)current_buffer);
         } else if (pressed_key == 'q') { 
-            /*stop_sound();*/
-            /*reset_song();*/
             quit = true;
             }
         input(&model, &pressed_key); 
@@ -73,10 +69,8 @@ int main() {
 void main_game_loop()
 {
     UINT32 *back_buffer, *front_buffer, *current_buffer;
-    start_music();
 
     bool endGame = false;
-    UINT32 musictime = 0;
 
     UINT32 time_then, time_now, time_elapsed;
 
@@ -93,11 +87,6 @@ void main_game_loop()
     clear_screen((UINT8 *)front_buffer);
     clear_screen((UINT8 *)back_buffer);
 
-    /*reset_song();*/
-    /*start_music();*/
-
-
-
     current_buffer = back_buffer;
     while (pressedKey != 'q' && !endGame) { /* Main game loop */
             input(&model, &pressedKey);
@@ -109,71 +98,33 @@ void main_game_loop()
 	        time_elapsed = time_now - time_then;
 
             if (time_elapsed > 0) {
-                
-                musictime += time_elapsed;
-                
                 process_synchronous_events(&model,&endGame);
+                sound_effects(&model, pressedKey);
                 render(&model, current_buffer);
                 set_video_base(current_buffer);
                 Vsync();
-                switch_buffers(&current_buffer, front_buffer, back_buffer);
-            
-                /*update_music(musictime);*/
-
-                time_then = time_now; 
-            
+                swap_buffer(&current_buffer, front_buffer, back_buffer);
             }
     }
-    collison_effect();
-    stop_sound();
     set_video_base(front_buffer);
     clear_screen((UINT8 *)front_buffer);
 }
 
 /***********************************************************************
-* Name: input
-*
-* Purpose: Handles user input for the game.
-*
-* Details: 
-*   - Captures input using `Cconis` and `Cnecin`.
-*   - Updates the `pressedKey` if ' ', 'q', or other specified keys are pressed.
-*   - Integrates user input into game mechanics via `animal_input`.
-
-*
-* Parameters:
-*     - model: Pointer to the game model.
-*     - pressedKey: Pointer to the variable storing the pressed key.
-***********************************************************************/
-void input(Model *model, char *pressedKey)
-{
-    if (Cconis()) /* Check if keyboard input is available */
-    {
-        char key = (char)Cnecin(); /* Read keyboard input */
-        if (key == ' ' || key == 'q' || key == 'W' || key == 'w') {
-            *pressedKey = key;
-        }
-    }
-    else {
-        *pressedKey = 0; /* Reset pressedKey if no key is pressed */
-    }
-}
-
-/***********************************************************************
-* Name: set_buffers
+* Function: set_buffers
 *
 * Purpose:
-*     Sets up the back and front buffers for double buffering.
+*     Configures the back and front buffers for double buffering.
 *
-* Details:
+* Description:
 *     - Aligns the back buffer's starting address to the next 256-byte 
-*       boundary.
-*     - Assigns the front buffer to the current video base.
-
+*       boundary for compatibility.
+*     - Assigns the front buffer to the current video base address.
+*
 * Parameters:
-*     - back_buffer: Double pointer to the back buffer.
-*     - front_buffer: Double pointer to the front buffer.
-*     - back_buffer_array: Array used to allocate memory for the back buffer.
+*     - back_buffer: Pointer to store the aligned back buffer address.
+*     - front_buffer: Pointer to store the front buffer address.
+*     - back_buffer_array: Preallocated memory array for the back buffer.
 ***********************************************************************/
 void set_buffers(UINT32** back_buffer, UINT32** front_buffer, UINT8 back_buffer_array[]) {
 
@@ -188,21 +139,21 @@ void set_buffers(UINT32** back_buffer, UINT32** front_buffer, UINT8 back_buffer_
 }
 
 /***********************************************************************
-* Name: switch_buffers
+* Function: swap_buffer
 *
 * Purpose:
-*     Toggles between the front and back buffers for double buffering.
+*     Switches between front and back buffers for smooth double buffering.
 *
-* Details:
-*     - Sets the current buffer to the back buffer if it's currently the 
-*       front buffer, and vice versa.
+* Description:
+*     - Updates the current buffer pointer to alternate between the 
+*       back and front buffers, ensuring smooth visual updates.
 *
 * Parameters:
-*     - current_buffer: Double pointer to the current buffer.
+*     - current_buffer: Pointer to the current buffer in use.
 *     - front_buffer: Pointer to the front buffer.
 *     - back_buffer: Pointer to the back buffer.
 ***********************************************************************/
-void switch_buffers(UINT32** current_buffer, UINT32* front_buffer, UINT32 * back_buffer) {
+void swap_buffer(UINT32** current_buffer, UINT32* front_buffer, UINT32 * back_buffer) {
 
     if(*current_buffer == front_buffer) {
         *current_buffer = back_buffer;
@@ -229,7 +180,6 @@ UINT32 get_time() {
     return time;
 }
 
-
 /***********************************************************************
 * Name: sound_effects
 *
@@ -246,18 +196,30 @@ UINT32 get_time() {
 * Returns:
 *     - void
 ***********************************************************************/
-
-void sound_effects(Model* model)
+void sound_effects(Model *model, char pressed_key)
 {
-    int i;
-    for (i = 0; i < MAX_COINS; i++) 
-    {
-        if (check_collision_coin(&model->chicken, model->coins, i))
-        {
+    int i, j;
+
+    for (i = 0; i < MAX_COINS; i++) {
+        if (model->coins[i].active && 
+            check_collision_coin(&model->chicken, &(model->coins[i]), i)) {
             coin_collected();
         }
+    }
+
+    if(check_collision_monster(&(model->chicken), &(model->monster)))
+        collison_effect();
         
-            
+    if (model->chicken.state == ANIMAL_STATE_JUMP || model->chicken.state == ANIMAL_STATE_JUMP_DOWN){
+        jump_effect(); 
+        for(j = 0; j < 5000; j++)
+            ;
+        if(check_collision_monster(&(model->chicken), &(model->monster)))
+            collison_effect();
+            for(j = 0; j < 5000; j++)
+                ;
+        stop_sound();
+
+            stop_sound();
     }
 }
-

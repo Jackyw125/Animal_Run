@@ -44,9 +44,6 @@
 #define MIXER_REGISTER 0x7          /* R7 */
 #define NOISE_PERIOD_REGISTER 0x6   /* R6 */
 
-
-
-
 /* Page 20 of the YM2149 Documentation 
 
 | B7 | B6 | B5 | B4 | B3 | B2 | B1 | B0 |
@@ -62,8 +59,6 @@
  * If the noise bit is 0 and the tone bit is 1, the output is a noise signal.
  * If the noise bit is 1 and the tone bit is 0, the output is a tone signal.
  * When both the noise bit and tone bit are 1, there is no output.
-
-
 */
 
 #define MIXER_NOTHING 0x3F               /* binary number : 0 0 111 111  */
@@ -111,8 +106,6 @@ typedef enum{
     ch_c
 } channel;
 
-
-
 void write_psg(int reg, UINT8 val);
 UINT8 read_psg(int reg);
 void set_tone(int channel, int tuning);
@@ -124,5 +117,3 @@ void set_noise(int tuning);
 void set_envelope(int Env_shape, UINT16 sustain);
 
 #endif
-
-

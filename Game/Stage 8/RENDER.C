@@ -15,7 +15,7 @@
 *       collected coins from the screen buffer.
 *     - Renders all game elements (chicken, coins, monster, score, and 
 *       ground).
-*     - Respawns coins when all are collected.
+*     - Respawns coins when collected.
 *
 * Parameters:
 *     - model: Pointer to the game model structure containing game 
@@ -25,13 +25,14 @@
 void render(Model *model, UINT32 *base) {
     int i;
     clear_screen((UINT8 *)base);
-
+    
     if (model->chicken.prev_x != model->chicken.x || model->chicken.prev_y != model->chicken.y) {
         clear_bitmap_32(base, model->chicken.prev_x, model->chicken.prev_y, clear_bitmap, CHICKEN_HEIGHT);
         model->chicken.prev_x = model->chicken.x;
         model->chicken.prev_y = model->chicken.y;
     }
     render_animal(&(model->chicken), base);
+
     for (i = 0; i < MAX_COINS; i++){
         if (check_collision_coin(&model->chicken, model->coins, i))
         {
@@ -48,6 +49,7 @@ void render(Model *model, UINT32 *base) {
     render_score(&(model->score), base);
     render_ground(&(model->ground), (UINT8 *)base);
 }
+
 
 /***********************************************************************
 * Name: render_score

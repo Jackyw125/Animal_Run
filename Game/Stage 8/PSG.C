@@ -1,3 +1,4 @@
+
 #include "psg.h"
 
 #include <osbind.h>
@@ -394,11 +395,5 @@ void set_envelope(int Env_shape, UINT16 sustain)
 		val = SAW_PERIOD_REGULAR;
 		break;
 		}
-	write_psg(TRIANGLE_PERIOD_REGULAR, val);
+	write_psg(0xD, val);
 }
-
-
-
-
-
-
