@@ -19,8 +19,8 @@
 void initialize_model(Model *model)
 {
     initialize_animal(&(model->chicken));
-    initialize_monster((model->monster), (model->coins));
-    initialize_coins((model->coins), (model->monster));
+    initialize_monster(&(model->monster), (model->coins));
+    initialize_coins((model->coins), &(model->monster));
     initialize_score(&(model->score));
     initialize_ground(&(model->ground), GROUND_Y); 
 }
@@ -38,12 +38,13 @@ void initialize_model(Model *model)
 void initialize_animal(Animal *chicken)
 {
     chicken->x = 10;
-    chicken->y = (GROUND_Y) - 62;
-    chicken->prev_x = -1;
-    chicken->prev_y = -1;
+    chicken->y = (GROUND_Y) - 64;
+    chicken->prev_x = chicken->x;
+    chicken->prev_y = chicken->y;
     chicken->velocity = ANIMAL_HORIZONTAL_MOVEMENT;
     chicken->isFalling = false;
-    chicken->max_y = chicken->y;
+    chicken->velocity_y = 0;
+    chicken->state = ANIMAL_STATE_ON_GROUND;
     chicken->dead = false;
 }
 
@@ -58,47 +59,38 @@ void initialize_animal(Animal *chicken)
 *     - model: Pointer to the game model to be initialized.
 ***********************************************************************/
 void initialize_monster(Monster *monster, Coin *coins) {
-    int i, j;
     bool isColliding;
+    int j;
+    do {
+        /* Randomly place the monster within the valid horizontal and vertical bounds */
+        monster->x = (SCREEN_WIDTH / 2) - (SCREEN_WIDTH / 8) + (Random() % (SCREEN_WIDTH / 4));
+        if (monster->x >= SCREEN_WIDTH) {
+            monster->x = SCREEN_WIDTH - 150;  
+        }
+        monster->y = Random() % (GROUND_Y - MONSTER_HEIGHT);
+        monster->off_screen = false;
 
-    for (i = 0; i < MAX_MONSTER; i++) {
-        do {
-            /*Randomly place the monster within the valid horizontal and vertical bounds*/
-            monster[i].x = rand();
-            monster[i].y = rand();
-            monster[i].off_screen = false;
+        isColliding = false;
 
-             isColliding = false;
-
-            /*Check collision with coins*/
+        /* Check collision with coins */
         for (j = 0; j < MAX_COINS; j++) {
-            if (check_object_collision(monster[i].x, monster[i].y, MONSTER_WIDTH, MONSTER_HEIGHT,
+            if (check_object_collision(monster->x, monster->y, MONSTER_WIDTH, MONSTER_HEIGHT,
                                        coins[j].x, coins[j].y, COIN_WIDTH, COIN_HEIGHT)) {
                 isColliding = true;
                 break;
             }
         }
 
-        /*Check collision with other monsters*/
-        for (j = 0; j < i; j++) {
-            if (check_object_collision(monster[i].x, monster[i].y, MONSTER_WIDTH, MONSTER_HEIGHT,
-                                       monster[j].x, monster[j].y, MONSTER_WIDTH, MONSTER_HEIGHT)) {
-                isColliding = true;
-                break;
-            }
-        }
-
-        /*Ensure the monster stays within screen boundaries*/
-        if (monster[i].y + MONSTER_HEIGHT > GROUND_Y || monster[i].y < 0) {
+        /* Ensure the monster stays within vertical boundaries */
+        if (monster->y + MONSTER_HEIGHT > GROUND_Y || monster->y < 0) {
             isColliding = true;
         }
 
-        } while (isColliding);
-    }
+    } while (isColliding);
 }
 
 /***********************************************************************
-* Name: initialize_score
+* Name: initialize_coin
 *
 * Purpose: Initializes the coin model with default values.
 *
@@ -107,7 +99,6 @@ void initialize_monster(Monster *monster, Coin *coins) {
 * Parameters:
 *     - model: Pointer to the game model to be initialized.
 ***********************************************************************/
-
 void initialize_coins(Coin *coins, Monster *monster) {
     int j, k;
     bool isColliding;
@@ -122,13 +113,12 @@ void initialize_coins(Coin *coins, Monster *monster) {
             isColliding = false;
 
             /*Check collision with monsters*/
-            for (k = 0; k < MAX_MONSTER; k++) {
-                if (check_object_collision(coins[j].x, coins[j].y, COIN_WIDTH, COIN_HEIGHT,
-                                           monster[k].x, monster[k].y, MONSTER_WIDTH, MONSTER_HEIGHT)) {
+            if (check_object_collision(coins[j].x, coins[j].y, COIN_WIDTH, COIN_HEIGHT,
+                                        monster->x, monster->y, MONSTER_WIDTH, MONSTER_HEIGHT)) {
                     isColliding = true;
                     break;
                 }
-            }
+
             /*Ensure the coin stays within screen boundaries*/
             if (coins[j].y + COIN_HEIGHT > GROUND_Y || coins[j].y < 0) {
                 isColliding = true;
@@ -137,7 +127,6 @@ void initialize_coins(Coin *coins, Monster *monster) {
         } while (isColliding);
     }
 }
-
 /***********************************************************************
 * Name: initialize_score
 *
@@ -206,36 +195,13 @@ void move_animal(Animal *chicken, int displacement_x, int displacement_y)
 * Parameters:
 *     - model: Pointer to the game model.
 ***********************************************************************/
-void animal_horizontal_movement(Model *model)
-{
-    model->chicken.prev_x = model->chicken.x;
-    move_animal(&(model->chicken), ANIMAL_HORIZONTAL_MOVEMENT, 0);
-    if (model->chicken.x > 640) {
-        model->chicken.x = 0;
+void animal_horizontal_movement(Animal *chicken) {
+    chicken->prev_x = chicken->x;
+    move_animal((chicken), ANIMAL_HORIZONTAL_MOVEMENT, 0);
+    if (chicken->x > 640) {
+        chicken->x = 0;
     }
 }
-
-/***********************************************************************
-* Name: has_animal_moved
-*
-* Purpose: Checks if the animal has moved.
-*
-* Details: Compares the current animal position
-*          with the previous state to determine if there's movement.
-*
-* Parameters:
-*     - animal: Pointer to the animal object.
-* Returns:
-*     - bool: True if the animal has moved, false otherwise.
-***********************************************************************/
-bool has_animal_moved(Animal *chicken)
-{
-    if(chicken->prev_x != chicken->x || chicken->prev_y != chicken->y)
-        return true;
-
-    return false;
-}
-
 
 /***********************************************************************
  * Name: check_object_collision

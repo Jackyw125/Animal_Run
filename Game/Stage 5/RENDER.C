@@ -24,15 +24,29 @@
 void render(Model *model, UINT32 *base)
 {
     int i;
-    if (has_animal_moved(&(model->chicken))) {   
+    render_animal(&(model->chicken), base);
+
+    if (model->chicken.prev_x != model->chicken.x || model->chicken.prev_y != model->chicken.y) {
         clear_bitmap_32(base, model->chicken.prev_x, model->chicken.prev_y, clear_bitmap, CHICKEN_HEIGHT);
+        model->chicken.prev_x = model->chicken.x;
+        model->chicken.prev_y = model->chicken.y;
         render_animal(&(model->chicken), base);
     }
 
-    render_monster(model->monster, base);
-    render_coin(model->coins, (UINT16 *)base);
+    for (i = 0; i < MAX_COINS; i++){
+        if (check_collision_coin(&model->chicken, model->coins, i))
+        {
+            clear_bitmap_32(base, model->coins[i].x, model->coins[i].y, clear_bitmap, CHICKEN_HEIGHT);
+        }
+        else if (model->coins[i].active){
+            render_coin((model->coins), (UINT16 *)base);
+        }
+    }
+    respawn_render(model,base);
 
-    render_score(&(model->score), base); 
+    render_monster(&model->monster, base);
+
+    render_score(&(model->score), base);
     render_ground(&(model->ground), (UINT8 *)base);
 }
 
@@ -72,8 +86,6 @@ void render_score(Score *score, UINT32 *base)
     }
 }
 
-
-
 /***********************************************************************
 * Name: render_animal
 *
@@ -88,7 +100,7 @@ void render_score(Score *score, UINT32 *base)
 
 void render_animal(Animal *chicken, UINT32 *base)
 {
-        plot_bitmap_32(base, chicken->x, chicken->y, chicken_bitmap, CHICKEN_HEIGHT);
+    plot_bitmap_32(base, chicken->x, chicken->y, chicken_bitmap, CHICKEN_HEIGHT);
 }
 
 /***********************************************************************
@@ -105,12 +117,7 @@ void render_animal(Animal *chicken, UINT32 *base)
 ***********************************************************************/
 void render_monster(Monster *monster, UINT32 *base)
 {
-    int i;
-    for (i = 0; i < MAX_MONSTER; i++) {
-        if (!monster[i].off_screen) {  
-            plot_bitmap_32(base, monster[i].x, monster[i].y, monster_bitmap, MONSTER_HEIGHT);
-        }
-    }
+        plot_bitmap_32(base, monster->x, monster->y, monster_bitmap, MONSTER_HEIGHT);
 }
 
 /***********************************************************************
@@ -125,8 +132,7 @@ void render_monster(Monster *monster, UINT32 *base)
 *     - coin: Pointer to the coin object.
 *     - base: Pointer to the base address of the screen buffer.
 ***********************************************************************/
-void render_coin(Coin *coin, UINT16 *base)
-{
+void render_coin(Coin *coin, UINT16 *base){
     int i;
     for (i = 0; i < MAX_COINS; i++) {
         if (coin[i].active) {  
@@ -135,6 +141,50 @@ void render_coin(Coin *coin, UINT16 *base)
     }
 }
 
+/***********************************************************************
+* Name: render_ground
+*
+* Purpose:
+*     Renders the ground onto the screen buffer.
+*
+* Details:
+*     Draws a horizontal line representing the ground using the y 
+*     position provided in the ground structure.
+*
+* Parameters:
+*     - ground: Pointer to the ground object containing position data.
+*     - base: Pointer to the base address of the screen buffer.
+***********************************************************************/
 void render_ground(Ground *ground, UINT8 *base) {
     plot_horizontal_line(base, ground->y);  
+}
+
+/***********************************************************************
+* Name: respawn_render
+*
+* Purpose:
+*     Handles the respawn and rendering of coins after collection.
+*
+* Details:
+*     - Checks if any coins have been collected.
+*     - If collected, initializes new coins and renders them.
+*     - Ensures the updated state is reflected in the screen buffer.
+*
+* Parameters:
+*     - model: Pointer to the game model structure containing game 
+*              state information.
+*     - base: Pointer to the base address of the screen buffer.
+***********************************************************************/
+void respawn_render(Model *model, UINT32 *base)
+{
+    bool collected;
+    collected = respawn_event(model);
+    if (collected) {
+        initialize_coins(model->coins, &(model->monster)); 
+        render_coin((model->coins), (UINT16 *)base);
+        collected = false;   
+    } 
+    else{
+        render_coin((model->coins), (UINT16 *)base);
+    }
 }

@@ -13,19 +13,23 @@ Purpose:
 #include <osbind.h>
 
 #define MAX_COINS 5
-#define MAX_MONSTER 2
-#define MAX_VERT_VELOCITY 24
-#define ANIMAL_HORIZONTAL_MOVEMENT 16
-#define ANIMAL_STATE_MOVING_UP 1
-#define ANIMAL_STATE_MOVING_DOWN 2
-#define ANIMAL_STATE_ON_GROUND 3
+#define MAX_VERT_VELOCITY 100
+#define ANIMAL_HORIZONTAL_MOVEMENT 8
+#define ANIMAL_HORIZONTAL_JUMP 200
+#define FLYING 35
+#define GRAVITY 20
+#define ANIMAL_STATE_JUMP 1
+#define ANIMAL_STATE_JUMP_DOWN 2
+#define ANIMAL_STATE_FLYING 3
+#define ANIMAL_STATE_FLY_DOWN 4
+#define ANIMAL_STATE_ON_GROUND 5
 
 typedef struct 
 {
     int x, y; 
     int prev_x, prev_y;
     int velocity;
-    int max_y;
+    int velocity_y;
     int state;
     bool isFalling;
     bool dead;
@@ -34,14 +38,15 @@ typedef struct
 typedef struct 
 {
     int x, y; 
+    int prev_x, prev_y;
     bool off_screen;
 } Monster;
 
 typedef struct
 {
-    int x, y;        
+    int x, y;     
+    int prev_x, prev_y;   
     bool active;     
-    bool collected; 
 } Coin;
 
 typedef struct
@@ -58,7 +63,7 @@ typedef struct
 
 typedef struct {
     Animal chicken;
-    Monster monster[MAX_MONSTER];
+    Monster monster;
     Score score;
     Coin coins[MAX_COINS];   
     Ground ground;
@@ -70,9 +75,7 @@ void initialize_score (Score *score);
 void initialize_monster(Monster *monster, Coin *coins);
 void initialize_coins(Coin *coins, Monster *monster);
 void initialize_ground(Ground *ground, int y);
-void animal_horizontal_movement(Model *model);
+void animal_horizontal_movement(Animal *chicken);
 void move_animal(Animal *chicken, int displacement_x, int displacement_y);
-bool has_animal_moved(Animal *chicken);
 bool check_object_collision(int x, int y, int width, int height, int x2, int y2, int width2, int height2);
-
 #endif
