@@ -1,6 +1,5 @@
 ;clears the screen	
-;Author : Marc Shroeder	
-
+;Author : Marc Schroeder	
 	    xdef		_clear_screen
 		xdef		_set_video_base
 		xdef		_get_video_base
@@ -78,7 +77,6 @@ _set_video_base:
 ;----------------- SUBROUTINE: void enter_super(); ----------------
 ; PURPOSE:  lets user enter supervisor mode
 ;-------------------------------------------------------------------------------
-
 _super_mode:
 		movem.l	d0,-(sp)
 
@@ -95,7 +93,6 @@ _super_mode:
 ;----------------- SUBROUTINE: void exit_super(); ----------------
 ; PURPOSE:  lets user exit supervisor mode
 ;-------------------------------------------------------------------------------
-
 _user_mode:
 		movem.l	d0,-(sp)
 

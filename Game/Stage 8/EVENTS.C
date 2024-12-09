@@ -49,23 +49,29 @@ void animal_input(Animal *chicken, char key)
             chicken->state = ANIMAL_STATE_FLY_DOWN; 
         }
     }
-    if (chicken->state == ANIMAL_STATE_ON_GROUND && key == ' ' && chicken->state != ANIMAL_STATE_JUMP_DOWN) {
-            animal_jump(chicken);
-        }
+    if (key == ' ' && chicken->state == ANIMAL_STATE_ON_GROUND) {
+        animal_jump(chicken);
+    }
 }
 
 /***********************************************************************
 * Name: check_collision_coin
 *
-* Purpose: Checks collision between animal and coins.
+* Purpose:
+*     Checks collision between the animal and coins.
 *
-* Details: Checks if the animal collides with any of the coins.
+* Details:
+*     - Iterates through the array of coins and checks for overlap with
+*       the animal.
+*     - Deactivates the coin if a collision is detected.
 *
 * Parameters:
-*     - animal: Pointer to the animal object.
-*     - coin: Pointer to the array of coin objects.
+*     - chicken: Pointer to the animal object.
+*     - coins: Pointer to the array of coin objects.
+*     - index: Index of the coin to check for collision.
+*
 * Returns:
-*     - bool: True if collision occurs, false otherwise.
+*     - bool: True if a collision occurs, false otherwise.
 ***********************************************************************/
 bool check_collision_coin(Animal *chicken, Coin *coins, int index) {
         int i = index;
@@ -136,14 +142,20 @@ bool check_ground_collision(Animal *chicken, Ground* ground) {
 /***********************************************************************
 * Name: animal_vertical_movement
 *
-* Purpose: Handles vertical movement of the animal, including jumping,
-*          falling, and flying states.
+* Purpose:
+*     Handles the vertical movement of the animal, including jumping, 
+*     falling, and flying states.
+*
+* Details:
+*     - Adjusts the animal's position based on its current state.
+*     - Ensures proper state transitions (e.g., landing after a jump).
 *
 * Parameters:
 *     - chicken: Pointer to the animal object.
 ***********************************************************************/
 void animal_vertical_movement(Animal *chicken)
 {
+    /*Animal *chicken = &(model->chicken);*/
     switch (chicken->state) {
         case ANIMAL_STATE_JUMP:
             move_animal(chicken, ANIMAL_HORIZONTAL_JUMP, -MAX_VERT_VELOCITY);
@@ -182,15 +194,40 @@ void animal_vertical_movement(Animal *chicken)
     }
 }
 
+/***********************************************************************
+* Name: animal_jump
+*
+* Purpose:
+*     Initiates a jump for the animal.
+*
+* Details:
+*     - Sets the animal's state to `ANIMAL_STATE_JUMP`.
+*
+* Parameters:
+*     - chicken: Pointer to the animal object.
+***********************************************************************/
 void animal_jump(Animal *chicken)
 {
     chicken->state = ANIMAL_STATE_JUMP;
 }
 
+/***********************************************************************
+* Name: animal_fly
+*
+* Purpose:
+*     Initiates flying for the animal.
+*
+* Details:
+*     - Sets the animal's state to `ANIMAL_STATE_FLYING`.
+*
+* Parameters:
+*     - chicken: Pointer to the animal object.
+***********************************************************************/
 void animal_fly(Animal *chicken)
 {
     chicken->state = ANIMAL_STATE_FLYING;
 }
+
 /***********************************************************************
  * Function Name: update_score
  *
@@ -218,6 +255,22 @@ void update_score(Model *model) {
     }
 }
 
+/***********************************************************************
+* Name: respawn_event
+*
+* Purpose:
+*     Determines if all coins have been collected, triggering a respawn.
+*
+* Details:
+*     - Iterates through the array of coins to check their active status.
+*     - Returns true if all coins are inactive.
+*
+* Parameters:
+*     - model: Pointer to the game model structure.
+*
+* Returns:
+*     - bool: True if all coins are collected, false otherwise.
+***********************************************************************/
 bool respawn_event(Model *model) {
     int i;
 
@@ -249,6 +302,19 @@ void process_synchronous_events(Model *model, bool *endGame)
     update_score(model);    
 }
 
+/***********************************************************************
+* Name: process_asynchronous_events
+*
+* Purpose:
+*     Processes asynchronous events triggered by user input.
+*
+* Details:
+*     - Updates the animal's state based on the pressed key.
+*
+* Parameters:
+*     - model: Pointer to the game model structure.
+*     - pressedKey: Pointer to the current key pressed by the user.
+***********************************************************************/
 void process_asynchronous_events(Model *model, char *pressedKey)
 {
     animal_input(&(model->chicken), *pressedKey);

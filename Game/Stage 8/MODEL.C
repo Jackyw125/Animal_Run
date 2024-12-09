@@ -203,28 +203,6 @@ void animal_horizontal_movement(Animal *chicken) {
     }
 }
 
-
-/***********************************************************************
-* Name: has_animal_moved
-*
-* Purpose: Checks if the animal has moved.
-*
-* Details: Compares the current animal position
-*          with the previous state to determine if there's movement.
-*
-* Parameters:
-*     - animal: Pointer to the animal object.
-* Returns:
-*     - bool: True if the animal has moved, false otherwise.
-***********************************************************************/
-bool has_animal_moved(Animal *chicken)
-{
-    if(chicken->prev_x != chicken->x || chicken->prev_y != chicken->y)
-        return true;
-
-    return false;
-}
-
 /***********************************************************************
  * Name: check_object_collision
  *

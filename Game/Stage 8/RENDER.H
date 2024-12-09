@@ -17,13 +17,12 @@ Purpose:
 #include "MENU.H"
 
 void render(Model *model, UINT32 *base);
-void double_buffer_render(Model *model, UINT32 *base);
 void render_animal(const Animal *chicken, UINT32 *base);
 void render_monster(const Monster *monster, UINT32 *base);
 void render_score(Score *score, UINT32 *base);
 void render_coin(Coin *coin, UINT16 *base);
 void render_ground(Ground *ground, UINT8 *base);
 void respawn_render(Model *model, UINT32 *base);
-void render_main_menu(UINT8 *base);
+void render_main_menu(UINT32 *base);
 
 #endif

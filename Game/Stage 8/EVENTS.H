@@ -11,7 +11,6 @@ Purpose:
 
 #include "MODEL.H"
 #include "TYPES.H"
-#include "BITMAP.H"
 
 void check_animal_death(Model *model, bool *endGame);
 void animal_input(Animal *chicken, char key);

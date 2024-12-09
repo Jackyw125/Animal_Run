@@ -30,12 +30,12 @@ int main() {
 
     clear_screen((UINT8 *)current_buffer);
 
-    render_main_menu(current_buffer);
+    render_main_menu((UINT32 *)current_buffer);
 
     while(quit == false) {
         if (pressed_key == ' ') {
             main_game_loop();
-            render_main_menu(current_buffer);
+            render_main_menu((UINT32 *)current_buffer);
         } else if (pressed_key == 'q') { 
             quit = true;
             }
@@ -45,6 +45,23 @@ int main() {
     return 0;
 }
 
+/***********************************************************************
+* Name: main_game_loop
+*
+* Purpose:
+*     Runs the main game loop, managing game updates and rendering.
+*
+* Details:
+*     - Initializes game model and sets up buffers for double buffering.
+*     - Handles user input and asynchronous events.
+*     - Renders the game state and switches between buffers for smooth 
+*       frame transitions.
+*     - Ends the game loop when 'q' is pressed or when the `endGame` 
+*       flag is set.
+*
+* Parameters:
+*     - None
+***********************************************************************/
 void main_game_loop()
 {
     UINT32 *back_buffer, *front_buffer, *current_buffer;
@@ -78,7 +95,7 @@ void main_game_loop()
 
             if (time_elapsed > 0) {
                 process_synchronous_events(&model,&endGame);
-                double_buffer_render(&model, current_buffer);
+                render(&model, current_buffer);
                 set_video_base(current_buffer);
                 Vsync();
                 switch_buffers(&current_buffer, front_buffer, back_buffer);
@@ -117,6 +134,22 @@ void input(Model *model, char *pressedKey)
     }
 }
 
+/***********************************************************************
+* Name: set_buffers
+*
+* Purpose:
+*     Sets up the back and front buffers for double buffering.
+*
+* Details:
+*     - Aligns the back buffer's starting address to the next 256-byte 
+*       boundary.
+*     - Assigns the front buffer to the current video base.
+
+* Parameters:
+*     - back_buffer: Double pointer to the back buffer.
+*     - front_buffer: Double pointer to the front buffer.
+*     - back_buffer_array: Array used to allocate memory for the back buffer.
+***********************************************************************/
 void set_buffers(UINT32** back_buffer, UINT32** front_buffer, UINT8 back_buffer_array[]) {
 
     UINT8 *temp = back_buffer_array;
@@ -129,6 +162,21 @@ void set_buffers(UINT32** back_buffer, UINT32** front_buffer, UINT8 back_buffer_
     *front_buffer =  get_video_base();
 }
 
+/***********************************************************************
+* Name: switch_buffers
+*
+* Purpose:
+*     Toggles between the front and back buffers for double buffering.
+*
+* Details:
+*     - Sets the current buffer to the back buffer if it's currently the 
+*       front buffer, and vice versa.
+*
+* Parameters:
+*     - current_buffer: Double pointer to the current buffer.
+*     - front_buffer: Pointer to the front buffer.
+*     - back_buffer: Pointer to the back buffer.
+***********************************************************************/
 void switch_buffers(UINT32** current_buffer, UINT32* front_buffer, UINT32 * back_buffer) {
 
     if(*current_buffer == front_buffer) {
