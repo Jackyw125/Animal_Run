@@ -1,18 +1,18 @@
 # Clean before compiling 
-all: clean tst_music tst_effects tst_psg tst_rend tst_mod tst_rast
+all: clean tst_musi tst_eff tst_psg 
 
 # Targets and dependencies
-tst_music.o: tst_music.c music.h 
-	cc68x -g -c tst_music.c
+tst_musi.o: tst_musi.c music.h 
+	cc68x -g -c tst_musi.c
 
-tst_music: tst_music.o psg.o music.o 
-	cc68x -g tst_music.o psg.o music.o -o tst_music
+tst_musi: tst_musi.o psg.o music.o 
+	cc68x -g tst_musi.o psg.o music.o -o tst_music
 
-tst_effects.o: tst_effects.c effects.h
-	cc68x -g -c tst_effects.c 
+tst_eff.o: tst_eff.c effects.h
+	cc68x -g -c tst_eff.c 
 
-tst_effects: tst_effects.o psg.o effects.o
-	cc68x -g tst_effects.o psg.o effects.o -o tst_effects
+tst_eff: tst_eff.o psg.o effects.o
+	cc68x -g tst_eff.o psg.o effects.o -o tst_eff
 
 tst_psg.o: tst_psg.c psg.h TYPES.h
 	cc68x -g -c tst_psg.c
@@ -29,43 +29,11 @@ effects.o: effects.c effects.h
 psg.o: psg.c psg.h TYPES.h
 	cc68x -g -c psg.c
 
-tst_rend: tst_rend.o render.o model.o bitmap.o raster.o
-	cc68x -g tst_rend.o render.o model.o bitmap.o raster.o -o tst_rend 
-
-tst_rend.o: tst_rend.c render.h
-	cc68x -g -c tst_rend.c
-
-render.o: render.c render.h model.h bitmap.h raster.h
-	cc68x -g -c render.c
-
-tst_mod: tst_mod.o model.o events.o
-	cc68x -g tst_mod.o model.o events.o -o tst_mod
-
-tst_mod.o: tst_mod.c model.h events.h
-	cc68x -g -c tst_mod.c
-
 events.o: events.c events.h
 	cc68x -g -c events.c
 
-model.o: model.c model.h
-	cc68x -g -c model.c
-
-tst_rast: tst_rast.o raster.o font.o bitmap.o 
-	cc68x -g tst_rast.o raster.o font.o bitmap.o -o tst_rast
-
-tst_rast.o: tst_rast.c raster.h bitmap.h 
-	cc68x -g -c tst_rast.c
-
-raster.o: raster.c raster.h
-	cc68x -g -c raster.c
-
-bitmap.o: bitmap.c bitmap.h font.h
-	cc68x -g -c bitmap.c
-	
-font.o: font.c font.h
-	cc68x -g -c font.c
 
 # Clean target
 clean:
-	$(RM) *.o *.tos tst_music tst_effects tst_psg tst_rend tst_mod tst_rast
+	$(RM) *.o *.tos tst_musi tst_eff tst_psg 
 

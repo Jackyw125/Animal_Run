@@ -39,10 +39,11 @@
 
 void coin_collected()
 {		
-	set_noise(0x1F);
-	set_tone(ch_c,0);
-	set_volume(2,0x10);
-	set_envelope(0x00,0x38);
+	enable_channel(ch_c, 0, 0);
+	set_noise(0x15);
+	set_tone(ch_c,350);
+	set_volume(2,0x15);
+	set_envelope(0x06,0x05);	
 
 }
 
@@ -64,18 +65,17 @@ void coin_collected()
 
 void collison_effect()
 {
-	set_noise(0x15);
-	set_tone(ch_c,350);
-	set_volume(2,0x15);
-	set_envelope(0x06,0x05);	
+	enable_channel(ch_c, 0, 1);
+	set_tone(ch_c,30);
+	set_volume(2,0x10);
+	set_envelope(0x00,0x38);
 	
-		
 }
 
 /*
- * Function: spawn_effect
+ * Function: jump_effect
  * ------------------------
- * Simulates the sound of a character spawn.
+ * Simulates the sound of a character jump.
  *
  * Parameters:
  *   None.
@@ -88,8 +88,9 @@ void collison_effect()
  *   Assumes that the PSG is properly initialized and ready to play sound effects.
  */
 
-void spawn_effect()
+void jump_effect()
 {
+	enable_channel(ch_c, 0, 0);
 	set_noise(0xAA);
 	set_tone(ch_c,200);
 	set_volume(ch_c,0x15);
