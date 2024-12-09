@@ -13,96 +13,63 @@ Purpose:
 #include <osbind.h>
 #include <stdio.h>
 
-UINT8 double_buffer[448][80] = {0};
+UINT8 double_buffer[35840] = {0};
 
 UINT32 get_time();
 void input(Model *model, char *pressedKey);
-void syncModel(Model *modelSrc, Model *modelDst);
-void process_synchronous_events(Model *model);
-void process_asynchronous_events(Model *model, bool *endGame, UINT32 *base);
+void main_game_loop();
+void set_buffers(UINT32** back_buffer, UINT32** front_buffer, UINT8 back_buffer_array[]);
+void switch_buffers(UINT32** current_buffer, UINT32* front_buffer, UINT32 * back_buffer);
 
 int main() {
     UINT8 *page1 = Physbase();
-    UINT8 *page2 = &double_buffer[0][0];
-    UINT8 confirmedInput;
 
-    bool useDoubleBuffer = true;
+    main_game_loop();
+
+    return 0;
+}
+
+void main_game_loop()
+{
+    UINT32 *back_buffer, *front_buffer, *current_buffer;
+
     bool endGame = false;
 
     UINT32 time_then, time_now, time_elapsed;
 
-    Model modelOne, modelTwo, modelThree;
-    Model *modelPtr = &modelOne;
-    Model *modelSnapshotOne = &modelTwo;
-    Model *modelSnapshotTwo = &modelThree;
+    Model model;
     char pressedKey = 0;
-    bool respawned = false;
 
-    initialize_model(modelPtr);
-    initialize_model(modelSnapshotOne);
-    initialize_model(modelSnapshotTwo);
-
-    page2 = (UINT8*)((size_t)page2 | 0xff ) + 1; /* finding page aligned address for second page*/
+    initialize_model(&model);
+    render(&model, (UINT32*)current_buffer);
 
     /* prepering models for main game loop*/
-    syncModel(modelPtr, modelSnapshotOne);
-    syncModel(modelPtr, modelSnapshotTwo);
 
-    /* preparing models for main game loop */
-    clear_screen(page1);
-    clear_screen(page2);
-    render(modelPtr, (UINT32*)page1);
-    render(modelPtr, (UINT32*)page2);
     time_then = get_time();
+    set_buffers(&back_buffer, &front_buffer, double_buffer);
+    clear_screen((UINT8 *)front_buffer);
+    clear_screen((UINT8 *)back_buffer);
 
+    current_buffer = back_buffer;
     while (pressedKey != 'q' && !endGame) { /* Main game loop */
-            Vsync();
-            if(useDoubleBuffer)
-                {
-                    /*if input is pending then process async events*/
-                    /*if clock has ticked then proccess sync events then render model*/
-                    input(modelPtr, &pressedKey);
-                    if(pressedKey == ' ' || 'w' || 'W')
-                    {
-                        process_asynchronous_events(modelPtr,&endGame,(UINT32*)page1);
-                    }
-                    time_now = get_time();
-		            time_elapsed = time_now - time_then;
-                    if(time_elapsed > 0){
-                        process_synchronous_events(modelPtr);
-                        respawn_render(modelPtr, (UINT32*)page1);
-                        syncModel(modelPtr, modelSnapshotOne);
-                        double_buffer_render(modelSnapshotTwo, (UINT32*)page1);
-                        Setscreen(-1, page1, -1);
-                    }
-                   
-                    useDoubleBuffer = false;
-                }
-                else
-                {
-                    input(modelPtr, &pressedKey);
-                    if(pressedKey == ' ' || 'w' || 'W')
-                    {
-                        process_asynchronous_events(modelPtr,&endGame,(UINT32*)page1);
-                    }
-                    time_now = get_time();
-		            time_elapsed = time_now - time_then;
-                    if(time_elapsed > 0){
-                        process_synchronous_events(modelPtr);
-                        respawn_render(modelPtr, (UINT32*)page2);
-                        syncModel(modelPtr, modelSnapshotTwo);
-                        double_buffer_render(modelSnapshotOne,(UINT32*)page2);
-                        Setscreen(-1, page2, -1);
-                    }
-                                      
-                    useDoubleBuffer = true;
-                }
+            input(&model, &pressedKey);
+            if(pressedKey == ' ' || 'w' || 'W')
+            {
+                process_asynchronous_events(&model,&pressedKey);
+            }
+            time_now = get_time();
+	        time_elapsed = time_now - time_then;
+
+            if (time_elapsed > 0) {
+                process_synchronous_events(&model,&endGame);
+                render(&model, current_buffer);
+                Setscreen(-1, current_buffer, -1);
                 Vsync();
-            time_then = get_time();
-        }
-    Setscreen(-1, page1, -1);
-    clear_screen(page1);
-    return 0;
+                switch_buffers(&current_buffer, front_buffer, back_buffer);
+            }
+    }
+    Setscreen(-1, front_buffer, -1);
+    clear_screen((UINT8 *)front_buffer);
 }
 
 /***********************************************************************
@@ -132,79 +99,58 @@ void input(Model *model, char *pressedKey)
     else {
         *pressedKey = 0; /* Reset pressedKey if no key is pressed */
     }
-    animal_input(&(model->chicken), *pressedKey);
 }
 
 /***********************************************************************
-* Name: syncModel
+* Name: set_buffers
 *
-* Purpose: Synchronizes the content of two game models.
+* Purpose:
+*     Sets up the back and front buffers for double buffering.
 *
-* Details: Copies data from the source model to the destination model,
-*          ensuring consistency between the two models.
-*
+* Details:
+*     - Aligns the back buffer's starting address to the next 256-byte 
+*       boundary.
+*     - Assigns the front buffer to the current video base.
+
 * Parameters:
-*     - modelSrc: Pointer to the source game model.
-*     - modelDst: Pointer to the destination game model.
+*     - back_buffer: Double pointer to the back buffer.
+*     - front_buffer: Double pointer to the front buffer.
+*     - back_buffer_array: Array used to allocate memory for the back buffer.
 ***********************************************************************/
-void syncModel(Model *modelSrc, Model *modelDst)
-{
-    UINT8 i;
-    UINT8 j;
-    Coin *srcCoin, *dstCoin;
+void set_buffers(UINT32** back_buffer, UINT32** front_buffer, UINT8 back_buffer_array[]) {
 
-    modelDst->chicken.x = modelSrc->chicken.x;
-    modelDst->chicken.y = modelSrc->chicken.y;
+    UINT8 *temp = back_buffer_array;
 
-    modelDst->chicken.velocity = modelSrc->chicken.velocity;
-    modelDst->chicken.isFalling = modelSrc->chicken.isFalling;
-    modelDst->chicken.velocity_y = modelSrc->chicken.velocity_y;
-    modelDst->chicken.dead = modelSrc->chicken.dead;
-
-
-    modelDst->score.total = modelSrc->score.total;
-    modelDst->score.prev_total = modelSrc->score.prev_total;
-    modelDst->score.digits = modelSrc->score.digits;
-   
-    modelDst->monster.x = modelSrc->monster.x;
-    modelDst->monster.y = modelSrc->monster.y;
-    modelDst->monster.prev_x = modelSrc->monster.prev_x;
-    modelDst->monster.prev_y = modelSrc->monster.prev_y;
-
-    srcCoin = (modelSrc->coins);
-    dstCoin = (modelDst->coins);
-
-    for(i=0; i < MAX_COINS;i++)
-    {
-        dstCoin->x = srcCoin->x;
-        dstCoin->y = srcCoin->y;
-        srcCoin++;
-        dstCoin++;    
+    while( ((UINT32) temp) & 0xFF) {
+        temp++;
     }
+
+    *back_buffer =	(UINT32*) temp;
+    *front_buffer =  Physbase();
 }
 
 /***********************************************************************
-* Name: process_synchronous_events
+* Name: switch_buffers
 *
-* Purpose: Processes synchronous events for the game.
+* Purpose:
+*     Toggles between the front and back buffers for double buffering.
 *
-* Details: Calls functions to handle animal movement,and animal death checking.
+* Details:
+*     - Sets the current buffer to the back buffer if it's currently the 
+*       front buffer, and vice versa.
 *
 * Parameters:
-*     - model: Pointer to the game model.
-*     - endGame: Pointer to a boolean indicating game end.
-*     - seed: Random seed for event generation.
+*     - current_buffer: Double pointer to the current buffer.
+*     - front_buffer: Pointer to the front buffer.
+*     - back_buffer: Pointer to the back buffer.
 ***********************************************************************/
-void process_synchronous_events(Model *model)
-{
-    animal_horizontal_movement(&(model->chicken));
-    animal_vertical_movement(&(model->chicken));
-}
+void switch_buffers(UINT32** current_buffer, UINT32* front_buffer, UINT32 * back_buffer) {
 
-void process_asynchronous_events(Model *model, bool *endGame, UINT32 *base)
-{
-    check_animal_death(model, endGame);
-    update_score(model);    
+    if(*current_buffer == front_buffer) {
+        *current_buffer = back_buffer;
+    } else {
+        *current_buffer = front_buffer;
+    }
 }
 
 /***********************************************************************

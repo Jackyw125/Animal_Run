@@ -21,35 +21,31 @@
  *            information (player, coins, monsters, score, ground, etc.).
  *   - base: Pointer to the base address of the screen buffer.
  ***********************************************************************/
-void render(Model *model, UINT32 *base)
-{
+void render(Model *model, UINT32 *base) {
     int i;
-    if (has_animal_moved(&(model->chicken))) {   
-        render_animal(&(model->chicken), base);
-    }
+    clear_screen((UINT8 *)base);
+    render_animal(&(model->chicken), base);
 
-    render_monster(&model->monster, base);
-    render_coin((model->coins), (UINT16 *)base);
-
-    render_score(&(model->score), base); 
-    render_ground(&(model->ground), (UINT8 *)base);
-}
-
-void double_buffer_render(Model *model, UINT32 *base) {
-    int i, j;
-    bool collected;
     if (model->chicken.prev_x != model->chicken.x || model->chicken.prev_y != model->chicken.y) {
         clear_bitmap_32(base, model->chicken.prev_x, model->chicken.prev_y, clear_bitmap, CHICKEN_HEIGHT);
         model->chicken.prev_x = model->chicken.x;
         model->chicken.prev_y = model->chicken.y;
         render_animal(&(model->chicken), base);
     }
+
     for (i = 0; i < MAX_COINS; i++){
         if (check_collision_coin(&model->chicken, model->coins, i))
         {
             clear_bitmap_32(base, model->coins[i].x, model->coins[i].y, clear_bitmap, CHICKEN_HEIGHT);
         }
+        else if (model->coins[i].active){
+            render_coin((model->coins), (UINT16 *)base);
+        }
     }
+    respawn_render(model,base);
+
+    render_monster(&model->monster, base);
+
     render_score(&(model->score), base);
     render_ground(&(model->ground), (UINT8 *)base);
 }
@@ -145,10 +141,40 @@ void render_coin(Coin *coin, UINT16 *base){
     }
 }
 
+/***********************************************************************
+* Name: render_ground
+*
+* Purpose:
+*     Renders the ground onto the screen buffer.
+*
+* Details:
+*     Draws a horizontal line representing the ground using the y 
+*     position provided in the ground structure.
+*
+* Parameters:
+*     - ground: Pointer to the ground object containing position data.
+*     - base: Pointer to the base address of the screen buffer.
+***********************************************************************/
 void render_ground(Ground *ground, UINT8 *base) {
     plot_horizontal_line(base, ground->y);  
 }
 
+/***********************************************************************
+* Name: respawn_render
+*
+* Purpose:
+*     Handles the respawn and rendering of coins after collection.
+*
+* Details:
+*     - Checks if any coins have been collected.
+*     - If collected, initializes new coins and renders them.
+*     - Ensures the updated state is reflected in the screen buffer.
+*
+* Parameters:
+*     - model: Pointer to the game model structure containing game 
+*              state information.
+*     - base: Pointer to the base address of the screen buffer.
+***********************************************************************/
 void respawn_render(Model *model, UINT32 *base)
 {
     bool collected;

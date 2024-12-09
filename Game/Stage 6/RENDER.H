@@ -16,7 +16,6 @@ Purpose:
 #include "FONT.H"
 
 void render(Model *model, UINT32 *base);
-void double_buffer_render(Model *model, UINT32 *base);
 void render_animal(const Animal *chicken, UINT32 *base);
 void render_monster(const Monster *monster, UINT32 *base);
 void render_score(Score *score, UINT32 *base);

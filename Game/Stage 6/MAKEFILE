@@ -8,10 +8,10 @@ CFLAGS = -g -c
 TARGET = main
 
 # Object Files
-OBJS = main.o model.o events.o render.o bitmap.o raster.o font.o
+OBJS = main.o model.o events.o render.o bitmap.o raster.o font.o rast_asm.o 
 
 # Header Files (Optional for readability)
-HEADERS = model.h render.h events.h bitmap.h raster.h font.h
+HEADERS = model.h render.h events.h bitmap.h raster.h font.h 
 
 # Build all (clean first)
 all: clean $(TARGET)
@@ -21,10 +21,10 @@ $(TARGET): $(OBJS)
 	$(CC) -g $(OBJS) -o $(TARGET)
 
 # Compile each source file into object files
-main.o: main.c model.h render.h events.h
+main.o: main.c model.h render.h events.h raster.h
 	$(CC) $(CFLAGS) main.c
 
-render.o: render.c render.h model.h events.h raster.h bitmap.h font.h
+render.o: render.c render.h model.h events.h raster.h bitmap.h font.h 
 	$(CC) $(CFLAGS) render.c
 
 model.o: model.c model.h
@@ -33,11 +33,14 @@ model.o: model.c model.h
 events.o: events.c events.h
 	$(CC) $(CFLAGS) events.c
 
-raster.o: raster.c raster.h
+raster.o: raster.c raster.h rast_asm.o
 	$(CC) $(CFLAGS) raster.c
 
 bitmap.o: bitmap.c bitmap.h font.h
 	$(CC) $(CFLAGS) bitmap.c
+
+rast_asm.o: rast_asm.s
+	gen -D -L2 rast_asm.s
 
 font.o: font.c font.h
 	$(CC) $(CFLAGS) font.c
