@@ -1,5 +1,5 @@
 ;clears the screen	
-;Author : Marc Shroeder	
+;Author : Marc Schroeder	
 
 	    xdef		_clear_screen
 
