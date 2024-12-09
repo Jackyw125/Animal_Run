@@ -1,14 +1,35 @@
 #include "RENDER.H"
 
+/***********************************************************************
+ * Name: render
+ *
+ * Purpose:
+ *   Renders the game model's current state onto the screen buffer.
+ *
+ * Details:
+ *   The function handles rendering all visible components of the game, 
+ *   including the player's character, monsters, coins, score, and ground. 
+ *   It also ensures proper handling of object movement and collision:
+ *     - Clears previous positions of the player and coins after movement.
+ *     - Renders updated positions for the player, monsters, and coins.
+ *     - Deactivates coins and clears their bitmap from the screen if 
+ *       collected by the player.
+ *     - Continuously updates and renders the game score and ground.
+ *
+ * Parameters:
+ *   - model: Pointer to the game model structure containing game state 
+ *            information (player, coins, monsters, score, ground, etc.).
+ *   - base: Pointer to the base address of the screen buffer.
+ ***********************************************************************/
 void render(Model *model, UINT32 *base)
 {
-
     render_animal(&(model->chicken), base);
-    render_monster(model->monster, base);
-    render_coin(model->coins, (UINT16 *)base);
+
+    render_monster(&model->monster, base);
+    render_coin((model->coins), (UINT16 *)base);
+
     render_score(&(model->score), base); 
     render_ground(&(model->ground), (UINT8 *)base);
-
 }
 
 /***********************************************************************
@@ -25,9 +46,10 @@ void render(Model *model, UINT32 *base)
 ***********************************************************************/
 void render_score(Score *score, UINT32 *base)
 {
-    UINT8 i;
     int temp = score->total;
     int digitPosition = 0;
+    int digits[10];  
+    int i;
 
     if (temp == 0) {
         clear_bitmap_8((UINT16*)base, digitPosition << 4, 8, char_delete, FONT_HEIGHT);
@@ -35,15 +57,16 @@ void render_score(Score *score, UINT32 *base)
         return;
     }
 
-    while (temp > 0)
-    {
-        clear_bitmap_8((UINT16*)base, digitPosition << 4, 8, char_delete, FONT_HEIGHT);
-        plot_bitmap_8((UINT16*)base, digitPosition << 4, 8, GLYPH_START(temp % 10 + '0'), FONT_HEIGHT);
-        temp /= 10;
-        digitPosition++;
+    while (temp > 0) {
+        digits[digitPosition++] = temp % 10; 
+        temp /= 10;  
+    }
+
+    for (i = digitPosition - 1; i >= 0; i--) {
+        clear_bitmap_8((UINT16*)base, (digitPosition - 1 - i) << 4, 8, char_delete, FONT_HEIGHT);
+        plot_bitmap_8((UINT16*)base, (digitPosition - 1 - i) << 4, 8, GLYPH_START(digits[i] + '0'), FONT_HEIGHT);
     }
 }
-
 
 /***********************************************************************
 * Name: render_animal
@@ -51,8 +74,7 @@ void render_score(Score *score, UINT32 *base)
 * Purpose: Renders the animal onto the screen buffer.
 *
 * Details: Renders the animal onto the screen buffer based on its
-*          position and facing direction using bitmap plotting.
-*
+*          position.
 * Parameters:
 *     - animal: Pointer to the animal object.
 *     - base: Pointer to the base address of the screen buffer.
@@ -60,7 +82,7 @@ void render_score(Score *score, UINT32 *base)
 
 void render_animal(Animal *chicken, UINT32 *base)
 {
-        plot_bitmap_32(base, chicken->x, chicken->y, chicken_bitmap, CHICKEN_HEIGHT);
+    plot_bitmap_32(base, chicken->x, chicken->y, chicken_bitmap, CHICKEN_HEIGHT);
 }
 
 /***********************************************************************
@@ -77,12 +99,7 @@ void render_animal(Animal *chicken, UINT32 *base)
 ***********************************************************************/
 void render_monster(Monster *monster, UINT32 *base)
 {
-    int i;
-    for (i = 0; i < MAX_MONSTER; i++) {
-        if (!monster[i].off_screen) {  
-            plot_bitmap_32(base, monster[i].x, monster[i].y, monster_bitmap, MONSTER_HEIGHT);
-        }
-    }
+        plot_bitmap_32(base, monster->x, monster->y, monster_bitmap, MONSTER_HEIGHT);
 }
 
 /***********************************************************************
@@ -97,15 +114,59 @@ void render_monster(Monster *monster, UINT32 *base)
 *     - coin: Pointer to the coin object.
 *     - base: Pointer to the base address of the screen buffer.
 ***********************************************************************/
-void render_coin(Coin *coin, UINT16 *base)
-{
+void render_coin(Coin *coin, UINT16 *base){
     int i;
     for (i = 0; i < MAX_COINS; i++) {
         if (coin[i].active) {  
             plot_bitmap_16(base, coin[i].x, coin[i].y, coin_bitmap, COIN_HEIGHT);
         }
-    }}
+    }
+}
 
+/***********************************************************************
+* Name: render_ground
+*
+* Purpose:
+*     Renders the ground onto the screen buffer.
+*
+* Details:
+*     Draws a horizontal line representing the ground using the y 
+*     position provided in the ground structure.
+*
+* Parameters:
+*     - ground: Pointer to the ground object containing position data.
+*     - base: Pointer to the base address of the screen buffer.
+***********************************************************************/
 void render_ground(Ground *ground, UINT8 *base) {
     plot_horizontal_line(base, ground->y);  
+}
+
+/***********************************************************************
+* Name: respawn_render
+*
+* Purpose:
+*     Handles the respawn and rendering of coins after collection.
+*
+* Details:
+*     - Checks if any coins have been collected.
+*     - If collected, initializes new coins and renders them.
+*     - Ensures the updated state is reflected in the screen buffer.
+*
+* Parameters:
+*     - model: Pointer to the game model structure containing game 
+*              state information.
+*     - base: Pointer to the base address of the screen buffer.
+***********************************************************************/
+void respawn_render(Model *model, UINT32 *base)
+{
+    bool collected;
+    collected = respawn_event(model);
+    if (collected) {
+        initialize_coins(model->coins, &(model->monster)); 
+        render_coin((model->coins), (UINT16 *)base);
+        collected = false;   
+    } 
+    else{
+        render_coin((model->coins), (UINT16 *)base);
+    }
 }

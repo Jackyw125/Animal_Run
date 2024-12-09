@@ -20,8 +20,6 @@ int main()
     render(model, base); 
 
     loop = 0;
-
-    /*render(model, base);*/
  
     return 0;
 }
