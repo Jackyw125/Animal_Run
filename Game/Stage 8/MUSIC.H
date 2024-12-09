@@ -4,6 +4,9 @@
 #include "psg.h"
 #include "TYPES.H"
 
+
+
+
 /* ***************** Header File for the music library ***************** */
 /*
  * File: music.h
@@ -30,5 +33,7 @@
  
 void start_music();
 void update_music(UINT32 time_elapsed);
- 
-#endif
+void reset_song()
+
+
+ #endif

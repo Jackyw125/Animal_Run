@@ -20,9 +20,11 @@
  * - Jacky On
  * 
  */
+ 
 
 void coin_collected();
 void collison_effect();
-void spawn_effect();
+void jump_effect();
+ 
  
  #endif

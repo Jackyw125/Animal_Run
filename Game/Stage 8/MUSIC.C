@@ -1,5 +1,8 @@
 #include "music.h"
+
 #include <stdio.h>
+
+
 
 /*
  * File: music.c
@@ -19,32 +22,33 @@
  int current_note = 0; 
  int duration;
  
+ 
  /* Paul McCartney - Wonderful Christmastime */
 
 const notes wonderful_christmastime[] = {
     /* First phrase: "D G A D" */
-    {293.66, 170},  /* D */
-    {392.00, 170},  /* G */
-    {440.00, 170},  /* A */
-    {293.66, 170},  /* D */
+    {293, 170},  /* D */
+    {392, 170},  /* G */
+    {440, 170},  /* A */
+    {293, 170},  /* D */
 
     /* Second phrase: "A G E D" */
-    {440.00, 170},  /* A */
-    {392.00, 170},  /* G */
-    {329.63, 170},  /* E */
-    {293.66, 170},  /* D */
+    {440, 170},  /* A */
+    {392, 170},  /* G */
+    {329, 170},  /* E */
+    {293, 170},  /* D */
 
     /* Third phrase: "D G A B" */
-    {293.66, 170},  /* D */
-    {392.00, 170},  /* G */
-    {440.00, 170},  /* A */
-    {493.88, 170},  /* B */
+    {293, 170},  /* D */
+    {392, 170},  /* G */
+    {440, 170},  /* A */
+    {493, 170},  /* B */
 
     /* Fourth phrase: "A G F# G" */
-    {440.00, 170},  /* A */
-    {392.00, 170},  /* G */
-    {369.99, 170},  /* F# */
-    {392.00, 170},  /* G */
+    {440, 170},  /* A */
+    {392, 170},  /* G */
+    {369, 170},  /* F# */
+    {392, 170},  /* G */
 }; 
  
  /*
@@ -108,6 +112,36 @@ void update_music(UINT32 time_elapsed)
 	}
 	
 }
+
+
+/*
+ * Function: reset_song
+ * --------------------
+ * Resets the song to the beginning by initializing the current note and setting the tone and duration for the first note.
+ *
+ * Parameters:
+ *   None.
+ * 
+ * Returns:
+ *   None.
+ *
+ * Side Effects:
+ *   Resets the state of the song and modifies the state of the PSG to play the first note.
+ *
+ * Assumptions/Limitations/Known Bugs:
+ *   Assumes that the `wonderful_christmastime` song data is properly loaded and contains valid notes.
+ *   Assumes that the PSG is properly initialized and ready to play music.
+ */
+
+void reset_song() {
+    current_note = 0; 
+    duration = wonderful_christmastime[current_note].duration; 
+    set_tone(ch_a, wonderful_christmastime[current_note].pitch); 
+}
+
+
+
+
 
 
 
