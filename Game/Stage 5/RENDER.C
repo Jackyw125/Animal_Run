@@ -24,14 +24,13 @@
 void render(Model *model, UINT32 *base)
 {
     int i;
-    render_animal(&(model->chicken), base);
 
     if (model->chicken.prev_x != model->chicken.x || model->chicken.prev_y != model->chicken.y) {
         clear_bitmap_32(base, model->chicken.prev_x, model->chicken.prev_y, clear_bitmap, CHICKEN_HEIGHT);
         model->chicken.prev_x = model->chicken.x;
         model->chicken.prev_y = model->chicken.y;
-        render_animal(&(model->chicken), base);
     }
+    render_animal(&(model->chicken), base);
 
     for (i = 0; i < MAX_COINS; i++){
         if (check_collision_coin(&model->chicken, model->coins, i))
