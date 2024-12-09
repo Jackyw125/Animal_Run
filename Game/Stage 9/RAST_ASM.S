@@ -22,7 +22,7 @@ fill_loop:	movem.l		d1-7/a1-6,-(a0)
 		rts
 
 video_reg_address  equ		$FFFF8201
-GEMDOS				equ		1
+GEMDOS			   equ		1
 
 ;----------------- SUBROUTINE: UINT32 *get_video_base(); ----------------
 ; PURPOSE:  Returns the address stored at the video base register
@@ -53,7 +53,6 @@ _get_video_base:
 ; PURPOSE:  Changes the address stored at the video base register to the address inputted
 ;-------------------------------------------------------------------------------
 ; CALLER INUT: takes a pointer
-; 
 ;-------------------------------------------------------------------------------
 NEW_VIDEO_BASE_OFFSET 	equ     	8
 

@@ -77,6 +77,5 @@ void initialize_coins(Coin *coins, Monster *monster);
 void initialize_ground(Ground *ground, int y);
 void animal_horizontal_movement(Animal *chicken);
 void move_animal(Animal *chicken, int displacement_x, int displacement_y);
-bool has_animal_moved(Animal *chicken);
 bool check_object_collision(int x, int y, int width, int height, int x2, int y2, int width2, int height2);
 #endif

@@ -303,55 +303,33 @@ L22:
 	move.l	-4(a6),a3
 	unlk	a6
 	rts
-_has_animal_moved:
-	link	a6,#0
-	move.l	a3,-(a7)
-	move.l	8(a6),a3
-	;line	219
-	move.w	4(a3),d0
-	cmp.w	(a3),d0
-	bne	L24
-	move.w	6(a3),d0
-	cmp.w	2(a3),d0
-	beq	L23
-L24:
-	;line	220
-	moveq	#1,d0
-	bra	L25
-L23:
-	;line	222
-	moveq	#0,d0
-L25:
-	move.l	(a7)+,a3
-	unlk	a6
-	rts
 _check_object_collision:
 	link	a6,#0
-	;line	246
+	;line	225
 	move.w	16(a6),d0
 	add.w	20(a6),d0
 	move.w	8(a6),d1
 	cmp.w	d0,d1
-	bge	L26
+	bge	L23
 	move.w	8(a6),d0
 	add.w	12(a6),d0
 	cmp.w	16(a6),d0
-	ble	L26
+	ble	L23
 	move.w	18(a6),d0
 	add.w	22(a6),d0
 	move.w	10(a6),d1
 	cmp.w	d0,d1
-	bge	L26
+	bge	L23
 	move.w	10(a6),d0
 	add.w	14(a6),d0
 	cmp.w	18(a6),d0
-	ble	L26
+	ble	L23
 	moveq	#1,d0
-	bra	L27
-L26:
+	bra	L24
+L23:
 	moveq	#0,d0
-L27:
-L28:
+L24:
+L25:
 	unlk	a6
 	rts
 	globl	_initialize_model
@@ -362,5 +340,4 @@ L28:
 	globl	_initialize_ground
 	globl	_animal_horizontal_movement
 	globl	_move_animal
-	globl	_has_animal_moved
 	globl	_check_object_collision
