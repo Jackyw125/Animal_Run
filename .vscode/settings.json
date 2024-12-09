@@ -7,7 +7,11 @@
         "FONT.C": "cpp",
         "RASTER.C": "cpp",
         "RENDER.C": "cpp",
-        "MENU.C": "cpp"
+        "MENU.C": "cpp",
+        "MODEL.C": "cpp",
+        "PSG.C": "cpp",
+        "EFFECTS.C": "cpp",
+        "MUSIC.C": "cpp"
     },
     "[m68k]": {
         "editor.rulers": []

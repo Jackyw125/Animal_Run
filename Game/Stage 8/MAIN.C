@@ -13,6 +13,7 @@ Purpose:
 #include "RASTER.H"
 #include <osbind.h>
 #include <stdio.h>
+#include <psg.h>
 
 UINT8 double_buffer[35840] = {0};
 
@@ -65,6 +66,7 @@ int main() {
 void main_game_loop()
 {
     UINT32 *back_buffer, *front_buffer, *current_buffer;
+    start_music();
 
     bool endGame = false;
 
