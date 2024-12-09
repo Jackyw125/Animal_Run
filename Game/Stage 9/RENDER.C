@@ -1,30 +1,7 @@
 #include "RENDER.H"
 
 /***********************************************************************
- * Name: render
- *
- * Purpose:
- *   Renders the game model's current state onto the screen buffer.
- *
- * Details:
- *   The function handles rendering all visible components of the game, 
- *   including the player's character, monsters, coins, score, and ground. 
- *   It also ensures proper handling of object movement and collision:
- *     - Clears previous positions of the player and coins after movement.
- *     - Renders updated positions for the player, monsters, and coins.
- *     - Deactivates coins and clears their bitmap from the screen if 
- *       collected by the player.
- *     - Continuously updates and renders the game score and ground.
- *
- * Parameters:
- *   - model: Pointer to the game model structure containing game state 
- *            information (player, coins, monsters, score, ground, etc.).
- *   - base: Pointer to the base address of the screen buffer.
- ***********************************************************************/
-
-
-/***********************************************************************
-* Name: double_buffer_render
+* Name: render
 *
 * Purpose:
 *     Renders the game model's state using double buffering for smooth 
@@ -38,7 +15,7 @@
 *       collected coins from the screen buffer.
 *     - Renders all game elements (chicken, coins, monster, score, and 
 *       ground).
-*     - Respawns coins when collected.
+*     - Respawns coins when all coins are collected.
 *
 * Parameters:
 *     - model: Pointer to the game model structure containing game 
