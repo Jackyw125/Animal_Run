@@ -11,14 +11,18 @@ Purpose:
 #include "RENDER.H"
 #include "EVENTS.H"
 #include "RASTER.H"
+#include "PSG.H"
+#include "MUSIC.H"
+#include "EFFECTS.H"
 #include <osbind.h>
 #include <stdio.h>
-#include <psg.h>
+
 
 UINT8 double_buffer[35840] = {0};
 
 UINT32 get_time();
 void main_game_loop();
+void sound_effects(Model* model);
 void input(Model *model, char *pressedKey);
 void set_buffers(UINT32** back_buffer, UINT32** front_buffer, UINT8 back_buffer_array[]);
 void switch_buffers(UINT32** current_buffer, UINT32* front_buffer, UINT32 * back_buffer);
@@ -28,6 +32,7 @@ int main() {
     char pressed_key;
     bool quit = false;
     Model model;
+    int i = 0;
 
     clear_screen((UINT8 *)current_buffer);
 
@@ -38,6 +43,8 @@ int main() {
             main_game_loop();
             render_main_menu((UINT32 *)current_buffer);
         } else if (pressed_key == 'q') { 
+            /*stop_sound();*/
+            /*reset_song();*/
             quit = true;
             }
         input(&model, &pressed_key); 
@@ -69,6 +76,7 @@ void main_game_loop()
     start_music();
 
     bool endGame = false;
+    UINT32 musictime = 0;
 
     UINT32 time_then, time_now, time_elapsed;
 
@@ -85,6 +93,11 @@ void main_game_loop()
     clear_screen((UINT8 *)front_buffer);
     clear_screen((UINT8 *)back_buffer);
 
+    /*reset_song();*/
+    /*start_music();*/
+
+
+
     current_buffer = back_buffer;
     while (pressedKey != 'q' && !endGame) { /* Main game loop */
             input(&model, &pressedKey);
@@ -96,13 +109,23 @@ void main_game_loop()
 	        time_elapsed = time_now - time_then;
 
             if (time_elapsed > 0) {
+                
+                musictime += time_elapsed;
+                
                 process_synchronous_events(&model,&endGame);
                 render(&model, current_buffer);
                 set_video_base(current_buffer);
                 Vsync();
                 switch_buffers(&current_buffer, front_buffer, back_buffer);
+            
+                /*update_music(musictime);*/
+
+                time_then = time_now; 
+            
             }
     }
+    collison_effect();
+    stop_sound();
     set_video_base(front_buffer);
     clear_screen((UINT8 *)front_buffer);
 }
@@ -205,3 +228,36 @@ UINT32 get_time() {
     Super(old_ssp);
     return time;
 }
+
+
+/***********************************************************************
+* Name: sound_effects
+*
+* Purpose:
+*     Handles sound effects for various in-game events.
+*
+* Details:
+*     - Checks for collisions between the chicken and coins in the game.
+*     - Triggers the coin_collected sound effect when a collision occurs.
+*
+* Parameters:
+*     - model: Pointer to the game model containing the chicken and coins.
+*
+* Returns:
+*     - void
+***********************************************************************/
+
+void sound_effects(Model* model)
+{
+    int i;
+    for (i = 0; i < MAX_COINS; i++) 
+    {
+        if (check_collision_coin(&model->chicken, model->coins, i))
+        {
+            coin_collected();
+        }
+        
+            
+    }
+}
+
