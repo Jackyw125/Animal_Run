@@ -24,7 +24,7 @@
 void render(Model *model, UINT32 *base) {
     int i;
     clear_screen((UINT8 *)base);
-
+    
     if (model->chicken.prev_x != model->chicken.x || model->chicken.prev_y != model->chicken.y) {
         clear_bitmap_32(base, model->chicken.prev_x, model->chicken.prev_y, clear_bitmap, CHICKEN_HEIGHT);
         model->chicken.prev_x = model->chicken.x;
