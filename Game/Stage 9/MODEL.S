@@ -10,7 +10,7 @@ _initialize_model:
 	jsr	_initialize_animal
 	addq.l	#4,a7
 	;line	22
-	moveq	#32,d0
+	moveq	#30,d0
 	add.l	d3,d0
 	move.l	d0,-(a7)
 	moveq	#16,d0
@@ -22,20 +22,20 @@ _initialize_model:
 	moveq	#16,d0
 	add.l	d3,d0
 	move.l	d0,-(a7)
-	moveq	#32,d0
+	moveq	#30,d0
 	add.l	d3,d0
 	move.l	d0,-(a7)
 	jsr	_initialize_coins
 	addq.l	#8,a7
 	;line	24
-	moveq	#26,d0
+	moveq	#24,d0
 	add.l	d3,d0
 	move.l	d0,-(a7)
 	jsr	_initialize_score
 	addq.l	#4,a7
 	;line	25
 	move.w	#320,-(a7)
-	moveq	#82,d0
+	moveq	#80,d0
 	add.l	d3,d0
 	move.l	d0,-(a7)
 	jsr	_initialize_ground
@@ -57,13 +57,11 @@ _initialize_animal:
 	;line	44
 	move.w	#4,8(a3)
 	;line	45
-	clr.b	14(a3)
-	;line	46
 	clr.w	10(a3)
-	;line	47
+	;line	46
 	move.w	#5,12(a3)
-	;line	48
-	clr.b	15(a3)
+	;line	47
+	clr.b	14(a3)
 	move.l	(a7)+,a3
 	unlk	a6
 	rts
@@ -72,7 +70,7 @@ _initialize_monster:
 	movem.l	d3/d4/a3,-(a7)
 	move.l	8(a6),a3
 L1:
-	;line	66
+	;line	65
 	pea	160
 	move.w	#17,-(a7)
 	jsr	__trap_14_w
@@ -81,13 +79,13 @@ L1:
 	jsr	.Xlrem
 	add.l	#240,d0
 	move.w	d0,(a3)
-	;line	67
+	;line	66
 	cmp.w	#640,(a3)
 	blt	L4
-	;line	68
+	;line	67
 	move.w	#490,(a3)
 L4:
-	;line	70
+	;line	69
 	pea	256
 	move.w	#17,-(a7)
 	jsr	__trap_14_w
@@ -96,14 +94,12 @@ L4:
 	jsr	.Xlrem
 	move.w	d0,2(a3)
 	;line	71
-	clr.b	8(a3)
-	;line	73
 	moveq	#0,d4
-	;line	76
+	;line	74
 	moveq	#0,d3
 	bra	L6
 L5:
-	;line	77
+	;line	75
 	move.w	#15,-(a7)
 	move.w	#15,-(a7)
 	move.w	d3,d0
@@ -125,9 +121,9 @@ L5:
 	lea	16(a7),a7
 	tst.b	d0
 	beq	L9
-	;line	79
+	;line	77
 	moveq	#1,d4
-	;line	80
+	;line	78
 	bra	L7
 L9:
 L8:
@@ -136,7 +132,7 @@ L6:
 	cmp.w	#5,d3
 	blt	L5
 L7:
-	;line	85
+	;line	83
 	move.w	2(a3),d0
 	add.w	#64,d0
 	cmp.w	#320,d0
@@ -144,7 +140,7 @@ L7:
 	tst.w	2(a3)
 	bge	L10
 L11:
-	;line	86
+	;line	84
 	moveq	#1,d4
 L10:
 L2:
@@ -156,14 +152,17 @@ L3:
 	rts
 _initialize_coins:
 	link	a6,#-6
-	movem.l	d3/d4/a3,-(a7)
+	movem.l	d3/d4/d5/a3/a4,-(a7)
 	move.l	8(a6),a3
-	;line	106
+	move.l	12(a6),a4
+	;line	105
+	moveq	#20,d5
+	;line	105
 	moveq	#0,d3
 	bra	L13
 L12:
 L16:
-	;line	109
+	;line	108
 	jsr	_rand
 	ext.l	d0
 	divs	#640,d0
@@ -171,7 +170,7 @@ L16:
 	move.w	d3,d1
 	muls	#10,d1
 	move.w	d0,0(a3,d1.l)
-	;line	110
+	;line	109
 	jsr	_rand
 	ext.l	d0
 	divs	#305,d0
@@ -181,21 +180,19 @@ L16:
 	move.l	d1,a0
 	add.l	a3,a0
 	move.w	d0,2(a0)
-	;line	111
+	;line	110
 	move.w	d3,d0
 	muls	#10,d0
 	move.l	d0,a0
 	add.l	a3,a0
 	move.b	#1,8(a0)
-	;line	113
+	;line	112
 	moveq	#0,d4
-	;line	116
+	;line	115
 	move.w	#64,-(a7)
 	move.w	#64,-(a7)
-	move.l	12(a6),a0
-	move.w	2(a0),-(a7)
-	move.l	12(a6),a0
-	move.w	(a0),-(a7)
+	move.w	2(a4),-(a7)
+	move.w	(a4),-(a7)
 	move.w	#15,-(a7)
 	move.w	#15,-(a7)
 	move.w	d3,d0
@@ -209,11 +206,24 @@ L16:
 	jsr	_check_object_collision
 	lea	16(a7),a7
 	tst.b	d0
-	beq	L19
-	;line	118
-	moveq	#1,d4
+	bne	L20
+	move.w	d3,d0
+	muls	#10,d0
+	move.w	0(a3,d0.l),d0
+	sub.w	(a4),d0
+	cmp.w	d0,d5
+	ble	L19
+	move.w	d3,d0
+	muls	#10,d0
+	move.l	d0,a0
+	add.l	a3,a0
+	move.w	2(a0),d0
+	sub.w	2(a4),d0
+	cmp.w	d0,d5
+	ble	L19
+L20:
 	;line	119
-	bra	L18
+	moveq	#1,d4
 L19:
 	;line	123
 	move.w	d3,d0
@@ -223,17 +233,17 @@ L19:
 	move.w	2(a0),d0
 	add.w	#15,d0
 	cmp.w	#320,d0
-	bgt	L21
+	bgt	L22
 	move.w	d3,d0
 	muls	#10,d0
 	move.l	d0,a0
 	add.l	a3,a0
 	tst.w	2(a0)
-	bge	L20
-L21:
+	bge	L21
+L22:
 	;line	124
 	moveq	#1,d4
-L20:
+L21:
 L17:
 	tst.b	d4
 	bne	L16
@@ -244,25 +254,25 @@ L13:
 	cmp.w	#5,d3
 	blt	L12
 L14:
-	movem.l	-18(a6),d3/d4/a3
+	movem.l	-26(a6),d3/d4/d5/a3/a4
 	unlk	a6
 	rts
 _initialize_score:
 	link	a6,#0
 	move.l	a3,-(a7)
 	move.l	8(a6),a3
-	;line	142
-	clr.w	2(a3)
 	;line	143
-	clr.w	(a3)
+	clr.w	2(a3)
 	;line	144
+	clr.w	(a3)
+	;line	145
 	clr.w	4(a3)
 	move.l	(a7)+,a3
 	unlk	a6
 	rts
 _initialize_ground:
 	link	a6,#0
-	;line	159
+	;line	160
 	move.l	8(a6),a0
 	move.w	12(a6),(a0)
 	unlk	a6
@@ -271,14 +281,14 @@ _move_animal:
 	link	a6,#0
 	move.l	a3,-(a7)
 	move.l	8(a6),a3
-	;line	178
-	move.w	(a3),4(a3)
 	;line	179
+	move.w	(a3),4(a3)
+	;line	180
 	move.w	2(a3),6(a3)
-	;line	181
+	;line	182
 	move.w	12(a6),d0
 	add.w	d0,(a3)
-	;line	182
+	;line	183
 	move.w	14(a6),d0
 	add.w	d0,2(a3)
 	move.l	(a7)+,a3
@@ -288,48 +298,48 @@ _animal_horizontal_movement:
 	link	a6,#0
 	move.l	a3,-(a7)
 	move.l	8(a6),a3
-	;line	197
+	;line	198
 	clr.w	-(a7)
 	move.w	#4,-(a7)
 	move.l	a3,-(a7)
 	jsr	_move_animal
 	addq.l	#8,a7
-	;line	198
-	cmp.w	#640,(a3)
-	ble	L22
 	;line	199
+	cmp.w	#640,(a3)
+	ble	L23
+	;line	200
 	clr.w	(a3)
-L22:
+L23:
 	move.l	-4(a6),a3
 	unlk	a6
 	rts
 _check_object_collision:
 	link	a6,#0
-	;line	225
+	;line	226
 	move.w	16(a6),d0
 	add.w	20(a6),d0
 	move.w	8(a6),d1
 	cmp.w	d0,d1
-	bge	L23
+	bge	L24
 	move.w	8(a6),d0
 	add.w	12(a6),d0
 	cmp.w	16(a6),d0
-	ble	L23
+	ble	L24
 	move.w	18(a6),d0
 	add.w	22(a6),d0
 	move.w	10(a6),d1
 	cmp.w	d0,d1
-	bge	L23
+	bge	L24
 	move.w	10(a6),d0
 	add.w	14(a6),d0
 	cmp.w	18(a6),d0
-	ble	L23
+	ble	L24
 	moveq	#1,d0
-	bra	L24
-L23:
-	moveq	#0,d0
+	bra	L25
 L24:
+	moveq	#0,d0
 L25:
+L26:
 	unlk	a6
 	rts
 	globl	_initialize_model

@@ -11,6 +11,11 @@ Purpose:
 #include "RENDER.H"
 #include "EVENTS.H"
 #include "RASTER.H"
+#include "INPUT.H"
+#include "MENU.H"
+#include "PSG.H"
+#include "MUSIC.H"
+#include "EFFECTS.H"
 #include "VBL.H"
 #include "GLOBAL.H"
 #include "VEC_IN.H"
@@ -22,9 +27,9 @@ Model model = {0};
 bool endGame = false;
 UINT32 get_time();
 void main_game_loop();
-void input(Model *model, char *pressedKey);
 void set_buffers(UINT32** back_buffer, UINT32** front_buffer, UINT8 back_buffer_array[]);
-void switch_buffers(UINT32** current_buffer, UINT32* front_buffer, UINT32 * back_buffer);
+void swap_buffer(UINT32** current_buffer, UINT32* front_buffer, UINT32 * back_buffer);
+void sound_effects(Model *model, char pressed_key);
 
 int main() {
     UINT8 *current_buffer = (UINT8 *)get_video_base();
@@ -41,6 +46,8 @@ int main() {
             main_game_loop();
             render_main_menu((UINT32 *)current_buffer);
         } else if (pressed_key == 'q') { 
+            stop_sound();
+            reset_song();
             quit = true;
             }
         input(&model, &pressed_key); 
@@ -85,7 +92,8 @@ void main_game_loop()
 
     current_buffer = back_buffer;
     orig_vbl_vector = install_vector(VBL_VECTOR_NUM, main_vbl_isr);
-
+    reset_song();
+    start_music();
     while (pressedKey != 'q' && !endGame) { /* Main game loop */
             input(&model, &pressedKey);
             if(pressedKey == ' ' || 'w' || 'W')
@@ -96,60 +104,32 @@ void main_game_loop()
             if (render_request == 1) {
                 render(&model, current_buffer);
                 set_video_base(current_buffer);
-                
-                switch_buffers(&current_buffer, front_buffer, back_buffer);
+                update_music(music_time);
+                swap_buffer(&current_buffer, front_buffer, back_buffer);
                 render_request = 0;
             }
     }
+    stop_sound();
     install_vector(VBL_VECTOR_NUM, orig_vbl_vector);
     set_video_base(front_buffer);
     clear_screen((UINT8 *)front_buffer);
 }
 
 /***********************************************************************
-* Name: input
-*
-* Purpose: Handles user input for the game.
-*
-* Details: 
-*   - Captures input using `Cconis` and `Cnecin`.
-*   - Updates the `pressedKey` if ' ', 'q', or other specified keys are pressed.
-*   - Integrates user input into game mechanics via `animal_input`.
-
-*
-* Parameters:
-*     - model: Pointer to the game model.
-*     - pressedKey: Pointer to the variable storing the pressed key.
-***********************************************************************/
-void input(Model *model, char *pressedKey)
-{
-    if (Cconis()) /* Check if keyboard input is available */
-    {
-        char key = (char)Cnecin(); /* Read keyboard input */
-        if (key == 'w' || key == 'q' || key == 'W' || key == ' ') {
-            *pressedKey = key;
-        }
-    }
-    else {
-        *pressedKey = 0; 
-    }
-}
-
-/***********************************************************************
-* Name: set_buffers
+* Function: set_buffers
 *
 * Purpose:
-*     Sets up the back and front buffers for double buffering.
+*     Configures the back and front buffers for double buffering.
 *
-* Details:
+* Description:
 *     - Aligns the back buffer's starting address to the next 256-byte 
-*       boundary.
-*     - Assigns the front buffer to the current video base.
-
+*       boundary for compatibility.
+*     - Assigns the front buffer to the current video base address.
+*
 * Parameters:
-*     - back_buffer: Double pointer to the back buffer.
-*     - front_buffer: Double pointer to the front buffer.
-*     - back_buffer_array: Array used to allocate memory for the back buffer.
+*     - back_buffer: Pointer to store the aligned back buffer address.
+*     - front_buffer: Pointer to store the front buffer address.
+*     - back_buffer_array: Preallocated memory array for the back buffer.
 ***********************************************************************/
 void set_buffers(UINT32** back_buffer, UINT32** front_buffer, UINT8 back_buffer_array[]) {
 
@@ -164,21 +144,21 @@ void set_buffers(UINT32** back_buffer, UINT32** front_buffer, UINT8 back_buffer_
 }
 
 /***********************************************************************
-* Name: switch_buffers
+* Function: swap_buffer
 *
 * Purpose:
-*     Toggles between the front and back buffers for double buffering.
+*     Switches between front and back buffers for smooth double buffering.
 *
-* Details:
-*     - Sets the current buffer to the back buffer if it's currently the 
-*       front buffer, and vice versa.
+* Description:
+*     - Updates the current buffer pointer to alternate between the 
+*       back and front buffers, ensuring smooth visual updates.
 *
 * Parameters:
-*     - current_buffer: Double pointer to the current buffer.
+*     - current_buffer: Pointer to the current buffer in use.
 *     - front_buffer: Pointer to the front buffer.
 *     - back_buffer: Pointer to the back buffer.
 ***********************************************************************/
-void switch_buffers(UINT32** current_buffer, UINT32* front_buffer, UINT32 * back_buffer) {
+void swap_buffer(UINT32** current_buffer, UINT32* front_buffer, UINT32 * back_buffer) {
 
     if(*current_buffer == front_buffer) {
         *current_buffer = back_buffer;
@@ -203,4 +183,48 @@ UINT32 get_time() {
     time = *((UINT32 *)0x462);
     Super(old_ssp);
     return time;
+}
+
+/***********************************************************************
+* Name: sound_effects
+*
+* Purpose:
+*     Handles sound effects for various in-game events.
+*
+* Details:
+*     - Checks for collisions between the chicken and coins in the game.
+*     - Triggers the coin_collected sound effect when a collision occurs.
+*
+* Parameters:
+*     - model: Pointer to the game model containing the chicken and coins.
+*
+* Returns:
+*     - void
+***********************************************************************/
+void sound_effects(Model *model, char pressed_key)
+{
+    int i, j;
+
+    for (i = 0; i < MAX_COINS; i++) {
+        if (model->coins[i].active && 
+            check_collision_coin(&model->chicken, &(model->coins[i]), i)) {
+            coin_collected();
+        }
+    }
+
+    if(check_collision_monster(&(model->chicken), &(model->monster)))
+        collison_effect();
+        
+    if (model->chicken.state == ANIMAL_STATE_JUMP || model->chicken.state == ANIMAL_STATE_JUMP_DOWN){
+        jump_effect(); 
+        for(j = 0; j < 5000; j++)
+            ;
+        if(check_collision_monster(&(model->chicken), &(model->monster)))
+            collison_effect();
+            for(j = 0; j < 5000; j++)
+                ;
+        stop_sound();
+
+            stop_sound();
+    }
 }

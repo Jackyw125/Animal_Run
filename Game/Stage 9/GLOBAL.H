@@ -7,6 +7,7 @@
 extern Model model;
 extern bool endGame;
 extern int render_request;
+extern UINT32 music_time;
 
 extern bool game_on;
 #endif

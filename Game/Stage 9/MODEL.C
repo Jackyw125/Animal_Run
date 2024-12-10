@@ -42,7 +42,6 @@ void initialize_animal(Animal *chicken)
     chicken->prev_x = chicken->x;
     chicken->prev_y = chicken->y;
     chicken->velocity = ANIMAL_HORIZONTAL_MOVEMENT;
-    chicken->isFalling = false;
     chicken->velocity_y = 0;
     chicken->state = ANIMAL_STATE_ON_GROUND;
     chicken->dead = false;
@@ -68,7 +67,6 @@ void initialize_monster(Monster *monster, Coin *coins) {
             monster->x = SCREEN_WIDTH - 150;  
         }
         monster->y = Random() % (GROUND_Y - MONSTER_HEIGHT);
-        monster->off_screen = false;
 
         isColliding = false;
 
@@ -100,26 +98,28 @@ void initialize_monster(Monster *monster, Coin *coins) {
 *     - model: Pointer to the game model to be initialized.
 ***********************************************************************/
 void initialize_coins(Coin *coins, Monster *monster) {
-    int j, k;
+    int j;
     bool isColliding;
+    const int MIN_DISTANCE = 20; 
 
     for (j = 0; j < MAX_COINS; j++) {
         do {
-            /*Randomly place the coin within valid horizontal and vertical bounds*/
+            /* Randomly place the coin within valid horizontal and vertical bounds */
             coins[j].x = rand() % SCREEN_WIDTH;
             coins[j].y = rand() % (GROUND_Y - COIN_HEIGHT);
             coins[j].active = true;
 
             isColliding = false;
 
-            /*Check collision with monsters*/
+            /* Check collision with monsters or proximity */
             if (check_object_collision(coins[j].x, coins[j].y, COIN_WIDTH, COIN_HEIGHT,
-                                        monster->x, monster->y, MONSTER_WIDTH, MONSTER_HEIGHT)) {
-                    isColliding = true;
-                    break;
-                }
+                                        monster->x, monster->y, MONSTER_WIDTH, MONSTER_HEIGHT) ||
+                ((coins[j].x - monster->x) < MIN_DISTANCE && 
+                 (coins[j].y - monster->y) < MIN_DISTANCE)) {
+                isColliding = true;
+            }
 
-            /*Ensure the coin stays within screen boundaries*/
+            /* Ensure the coin stays within screen boundaries */
             if (coins[j].y + COIN_HEIGHT > GROUND_Y || coins[j].y < 0) {
                 isColliding = true;
             }
@@ -127,6 +127,7 @@ void initialize_coins(Coin *coins, Monster *monster) {
         } while (isColliding);
     }
 }
+
 /***********************************************************************
 * Name: initialize_score
 *

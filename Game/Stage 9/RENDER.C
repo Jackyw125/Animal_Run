@@ -15,7 +15,7 @@
 *       collected coins from the screen buffer.
 *     - Renders all game elements (chicken, coins, monster, score, and 
 *       ground).
-*     - Respawns coins when all coins are collected.
+*     - Respawns coins when collected.
 *
 * Parameters:
 *     - model: Pointer to the game model structure containing game 
@@ -97,7 +97,6 @@ void render_score(Score *score, UINT32 *base)
 *     - animal: Pointer to the animal object.
 *     - base: Pointer to the base address of the screen buffer.
 ***********************************************************************/
-
 void render_animal(Animal *chicken, UINT32 *base)
 {
     plot_bitmap_32(base, chicken->x, chicken->y, chicken_bitmap, CHICKEN_HEIGHT);
