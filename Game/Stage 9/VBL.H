@@ -1,3 +1,10 @@
+/*
+Author: Jacky & Ochihai
+Date: Dec 09, 2024
+
+Purpose:
+    - VBL DRIVER
+*/
 #ifndef VBL_H
 #define VBL_H
 
