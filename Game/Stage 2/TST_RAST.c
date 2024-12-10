@@ -60,6 +60,9 @@ int main()
 	test_plot_bitmap_16((UINT16 *)base, coin_bitmap, COIN_HEIGHT);
 	pause();
 
+	test_plot_bitmap_32(base, monster_bitmap, MONSTER_HEIGHT);
+	pause();
+	
 	/*
     Test Case: test_plot_bitmap_32
     Purpose:
@@ -113,7 +116,6 @@ Function Name: pause
 Purpose:
     Pause program execution until the user provides input.
 ***********************************************************************/
-
 void pause() {
     while (!Cconis()) {
     }
