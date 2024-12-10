@@ -42,7 +42,7 @@ void render(Model *model, UINT32 *base) {
             render_coin((model->coins), (UINT16 *)base);
         }
     }
-    respawn_render(model,base);
+    respawn_render(model,base); /*respawns the coins when all coins are collected*/
 
     render_monster(&model->monster, base);
 

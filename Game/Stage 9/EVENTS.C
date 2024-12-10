@@ -83,7 +83,6 @@ bool check_collision_coin(Animal *chicken, Coin *coins, int index) {
                                     (chicken->y < coins[i].y + COIN_HEIGHT);
 
             if (horizontal_overlap && vertical_overlap) {
-                coins[i].active = false;
                 return true; 
             }
         }

@@ -24,4 +24,5 @@ void update_score(Model *model);
 bool respawn_event(Model *model);
 void process_synchronous_events(Model *model, bool *endGame);
 void process_asynchronous_events(Model *model, char *pressedKey);
+
 #endif

@@ -225,6 +225,6 @@ void sound_effects(Model *model, char pressed_key)
                 ;
         stop_sound();
 
-            stop_sound();
+        stop_sound();
     }
 }
