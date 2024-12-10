@@ -1,5 +1,5 @@
     	xref _do_vbl_isr
-		xdef _main_vbl_isr
+	xdef _main_vbl_isr
  
 
 ;----------------- SUBROUTINE: void main_vbl_isr(); ----------------
