@@ -8,21 +8,27 @@ CFLAGS = -g -c
 TARGET = main
 
 # Object Files
-OBJS = main.o model.o events.o render.o bitmap.o raster.o font.o rast_asm.o 
+OBJS = main.o model.o events.o render.o bitmap.o raster.o font.o rast_asm.o input.o 
 
 # Header Files (Optional for readability)
-HEADERS = model.h render.h events.h bitmap.h raster.h font.h 
+HEADERS = model.h render.h events.h bitmap.h raster.h font.h input.h
 
 # Build all (clean first)
-all: clean $(TARGET)
+all: clean $(TARGET) 
 
 # Link the final executable
 $(TARGET): $(OBJS)
 	$(CC) -g $(OBJS) -o $(TARGET)
 
+tst_inp: tst_inp.o model.o events.o input.o
+	cc68x -g tst_inp.o model.o events.o input.o -o tst_inp
+
 # Compile each source file into object files
-main.o: main.c model.h render.h events.h raster.h
+main.o: main.c model.h render.h events.h raster.h input.h
 	$(CC) $(CFLAGS) main.c
+
+tst_inp.o: tst_inp.c model.h events.h input.h
+	$(CC) $(CFLAGS) tst_inp.c
 
 render.o: render.c render.h model.h events.h raster.h bitmap.h font.h
 	$(CC) $(CFLAGS) render.c
@@ -45,6 +51,8 @@ rast_asm.o: rast_asm.s
 font.o: font.c font.h
 	$(CC) $(CFLAGS) font.c
 
+input.o: input.c input.h
+	$(CC) $(CFLAGS) input.c
 
 # Clean up
 clean:

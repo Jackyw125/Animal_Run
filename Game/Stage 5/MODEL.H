@@ -31,7 +31,6 @@ typedef struct
     int velocity;
     int velocity_y;
     int state;
-    bool isFalling;
     bool dead;
 } Animal;
 
@@ -39,7 +38,6 @@ typedef struct
 {
     int x, y; 
     int prev_x, prev_y;
-    bool off_screen;
 } Monster;
 
 typedef struct

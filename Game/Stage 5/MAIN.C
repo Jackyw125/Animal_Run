@@ -20,10 +20,10 @@ Error:
 #include "RENDER.H"
 #include "EVENTS.H"
 #include "RASTER.H"
+#include "INPUT.H"
 #include <osbind.h>
 #include <stdio.h>
 
-void input(Model *model, char *pressedKey);
 UINT32 get_time();
 
 int main() {
@@ -58,33 +58,6 @@ int main() {
     }
     clear_screen(page1);
     return 0;
-}
-
-/***********************************************************************
-* Name: input
-*
-* Purpose: Handles user input for the game.
-*
-* Details: Checks if keyboard input is available and reads the key.
-*          If the pressed key is ' ' or 'q', it updates the
-*          pressedKey variable accordingly.
-*
-* Parameters:
-*     - model: Pointer to the game model.
-*     - pressedKey: Pointer to the variable storing the pressed key.
-***********************************************************************/
-void input(Model *model, char *pressedKey)
-{
-    if (Cconis()) /* Check if keyboard input is available */
-    { 
-        char key = (char)Cnecin(); /* Read keyboard input */
-        if (key == ' ' || key == 'q' || key == 'w' || key == 'W') {
-            *pressedKey = key;
-        }
-    } 
-    else {
-        *pressedKey = 0; /* Reset pressedKey if no key is pressed */
-    }
 }
 
 /***********************************************************************
