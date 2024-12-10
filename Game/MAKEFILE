@@ -1,0 +1,75 @@
+# Compiler
+CC = cc68x
+
+# Compiler Flags
+CFLAGS = -g -c
+
+# Target Executable
+TARGET = main
+
+# Object Files
+OBJS = main.o model.o events.o render.o bitmap.o raster.o font.o rast_asm.o input.o menu.o psg.o music.o effects.o vbl.o vbl_asm.o vec_in.o
+
+# Header Files (Optional for readability)
+HEADERS = model.h render.h events.h bitmap.h raster.h font.h input.h menu.h psg.h music.h effects.h global.h vbl.h vec_in.h
+
+# Build all (clean first)
+all: clean $(TARGET)
+
+# Link the final executable
+$(TARGET): $(OBJS)
+	$(CC) -g $(OBJS) -o $(TARGET)
+
+# Compile each source file into object files
+main.o: main.c model.h render.h events.h raster.h input.h menu.h psg.h music.h effects.h vbl.h global.h vec_in.h
+	$(CC) $(CFLAGS) main.c
+
+render.o: render.c render.h model.h events.h raster.h bitmap.h font.h menu.h
+	$(CC) $(CFLAGS) render.c
+
+model.o: model.c model.h
+	$(CC) $(CFLAGS) model.c
+
+events.o: events.c events.h
+	$(CC) $(CFLAGS) events.c
+
+raster.o: raster.c raster.h rast_asm.o
+	$(CC) $(CFLAGS) raster.c
+
+bitmap.o: bitmap.c bitmap.h font.h
+	$(CC) $(CFLAGS) bitmap.c
+
+font.o: font.c font.h
+	$(CC) $(CFLAGS) font.c
+
+input.o: input.c input.h
+	$(CC) $(CFLAGS) input.c
+
+menu.o: menu.c menu.h
+	$(CC) $(CFLAGS) menu.c
+
+psg.o: psg.c psg.h
+	$(CC) $(CFLAGS) psg.c
+
+music.o: music.c music.h 
+	$(CC) $(CFLAGS) music.c
+
+effects.o: effects.c effects.h psg.h
+	$(CC) $(CFLAGS) effects.c
+
+vbl.o: vbl.c vbl.h
+	$(CC) $(CFLAGS) vbl.c
+
+vec_in.o: vec_in.c vec_in.h
+	$(CC) $(CFLAGS) vec_in.c
+	
+rast_asm.o: rast_asm.s
+	gen -D -L2 rast_asm.s
+
+vbl_asm.o: vbl_asm.S
+	gen -D -L2 vbl_asm.S
+
+# Clean up
+clean:
+	$(RM) $(OBJS) $(TARGET)
+
