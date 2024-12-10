@@ -1,7 +1,7 @@
 ;clears the screen	
 ;Author : Marc Schroeder	
 
-	    xdef		_clear_screen
+	    	xdef		_clear_screen
 		xdef		_set_video_base
 		xdef		_get_video_base
 		xdef		_super_mode
