@@ -13,6 +13,8 @@
 #define COIN_HEIGHT 15
 #define COIN_WIDTH 15
 
+#define GROUND_Y 320
+
 typedef unsigned char UINT8;
 typedef unsigned int  UINT16;
 typedef unsigned long UINT32;

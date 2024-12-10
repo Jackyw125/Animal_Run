@@ -42,7 +42,6 @@ void initialize_animal(Animal *chicken)
     chicken->prev_x = chicken->x;
     chicken->prev_y = chicken->y;
     chicken->velocity = ANIMAL_HORIZONTAL_MOVEMENT;
-    chicken->isFalling = false;
     chicken->velocity_y = 0;
     chicken->state = ANIMAL_STATE_ON_GROUND;
     chicken->dead = false;
@@ -68,7 +67,6 @@ void initialize_monster(Monster *monster, Coin *coins) {
             monster->x = SCREEN_WIDTH - 150;  
         }
         monster->y = Random() % (GROUND_Y - MONSTER_HEIGHT);
-        monster->off_screen = false;
 
         isColliding = false;
 

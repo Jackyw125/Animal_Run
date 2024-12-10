@@ -155,7 +155,6 @@ bool check_ground_collision(Animal *chicken, Ground* ground) {
 ***********************************************************************/
 void animal_vertical_movement(Animal *chicken)
 {
-    /*Animal *chicken = &(model->chicken);*/
     switch (chicken->state) {
         case ANIMAL_STATE_JUMP:
             move_animal(chicken, ANIMAL_HORIZONTAL_JUMP, -MAX_VERT_VELOCITY);
