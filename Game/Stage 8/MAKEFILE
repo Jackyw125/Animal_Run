@@ -21,10 +21,10 @@ $(TARGET): $(OBJS)
 	$(CC) -g $(OBJS) -o $(TARGET)
 
 # Compile each source file into object files
-main.o: main.c model.h render.h events.h raster.h input.h
+main.o: main.c model.h render.h events.h raster.h input.h menu.h psg.h music.h effects.h 
 	$(CC) $(CFLAGS) main.c
 
-render.o: render.c render.h model.h events.h raster.h bitmap.h font.h menu.h psg.h music.h effects.h 
+render.o: render.c render.h model.h events.h raster.h bitmap.h font.h 
 	$(CC) $(CFLAGS) render.c
 
 model.o: model.c model.h

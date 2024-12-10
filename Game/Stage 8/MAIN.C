@@ -12,6 +12,7 @@ Purpose:
 #include "EVENTS.H"
 #include "RASTER.H"
 #include "INPUT.H"
+#include "MENU.H"
 #include "PSG.H"
 #include "MUSIC.H"
 #include "EFFECTS.H"
@@ -41,6 +42,8 @@ int main() {
             main_game_loop();
             render_main_menu((UINT32 *)current_buffer);
         } else if (pressed_key == 'q') { 
+            stop_sound();
+            reset_song();
             quit = true;
             }
         input(&model, &pressed_key); 
@@ -73,7 +76,7 @@ void main_game_loop()
     bool endGame = false;
 
     UINT32 time_then, time_now, time_elapsed;
-
+    UINT32 music_time;
     Model model;
     char pressedKey = 0;
 
@@ -88,6 +91,8 @@ void main_game_loop()
     clear_screen((UINT8 *)back_buffer);
 
     current_buffer = back_buffer;
+    reset_song();
+    start_music();
     while (pressedKey != 'q' && !endGame) { /* Main game loop */
             input(&model, &pressedKey);
             if(pressedKey == ' ' || 'w' || 'W')
@@ -98,14 +103,18 @@ void main_game_loop()
 	        time_elapsed = time_now - time_then;
 
             if (time_elapsed > 0) {
+                music_time += time_elapsed;
                 process_synchronous_events(&model,&endGame);
                 sound_effects(&model, pressedKey);
                 render(&model, current_buffer);
                 set_video_base(current_buffer);
                 Vsync();
                 swap_buffer(&current_buffer, front_buffer, back_buffer);
+
+                update_music(music_time);
             }
     }
+    stop_sound();
     set_video_base(front_buffer);
     clear_screen((UINT8 *)front_buffer);
 }
